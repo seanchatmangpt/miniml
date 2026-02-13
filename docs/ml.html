@@ -372,7 +372,7 @@ d.<span class="fn">getTrend</span>(); d.<span class="fn">getSeasonal</span>(); d
     // ── Load library (dynamic import so function defs always run) ──
     let ml = null;
     try {
-      ml = await import('https://esm.sh/micro-ml@0.9.0');
+      ml = await import('https://esm.sh/micro-ml@1.0.0');
       window.ml = ml;
       const t0 = performance.now();
       await ml.init();
