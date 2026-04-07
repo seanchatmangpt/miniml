@@ -113,4 +113,45 @@ mod tests {
         let auc = roc_auc_impl(&y_true, &y_scores).unwrap();
         assert_eq!(auc, 0.0); // Undefined, returns 0
     }
+
+    // ML CORRECTNESS VALIDATION TESTS
+
+    #[test]
+    fn test_roc_auc_trapezoidal_rule() {
+        // Verify AUC using trapezoidal rule
+        // Perfect: [0,0,1,1] with scores [0.1,0.2,0.9,1.0]
+        // TPR: [0, 0, 1, 1], FPR: [0, 0, 0, 1]
+        // AUC = 1.0 (perfect separation)
+        let y_true = vec![0.0, 0.0, 1.0, 1.0];
+        let y_scores = vec![0.1, 0.2, 0.9, 1.0];
+        let auc = roc_auc_impl(&y_true, &y_scores).unwrap();
+        assert!((auc - 1.0).abs() < 1e-10);
+    }
+
+    #[test]
+    fn test_log_loss_formula_verification() {
+        // Log Loss = -Σ(y*log(p) + (1-y)*log(1-p)) / n
+        // For perfect prediction p=0.99 for true class:
+        // y=0, p=[0.99,0.01]: -log(0.99) ≈ 0.01
+        // y=1, p=[0.01,0.99]: -log(0.99) ≈ 0.01
+        let y_true = vec![0.0, 1.0];
+        let y_proba = vec![0.99, 0.01, 0.01, 0.99];
+        let loss = log_loss(&y_true, &y_proba, 2).unwrap();
+
+        // Should be small (good predictions)
+        assert!(loss < 0.1);
+        assert!(loss > 0.0);
+    }
+
+    #[test]
+    fn test_log_loss_worst_case() {
+        // Worst case: predicting opposite
+        // y=1, p=[0.99, 0.01] -> -log(0.01) = 4.6
+        let y_true = vec![1.0];
+        let y_proba = vec![0.99, 0.01];
+        let loss = log_loss(&y_true, &y_proba, 2).unwrap();
+
+        // Should be high (bad prediction)
+        assert!(loss > 4.0);
+    }
 }

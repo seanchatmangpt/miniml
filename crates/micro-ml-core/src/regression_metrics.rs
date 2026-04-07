@@ -141,4 +141,52 @@ mod tests {
         // Median should be much lower than mean due to outlier
         assert!(med_ae < mae);
     }
+
+    // ML CORRECTNESS VALIDATION TESTS
+
+    #[test]
+    fn test_r2_formula_verification() {
+        // Verify R² formula: R² = 1 - SS_res/SS_tot
+        // y = [1,2,3,4], y_pred = [1,2,3,4] -> SS_res = 0, R² = 1
+        let y_true = vec![1.0, 2.0, 3.0, 4.0];
+        let y_pred = vec![1.0, 2.0, 3.0, 4.0];
+        let r2 = r2_score(&y_true, &y_pred).unwrap();
+        assert!((r2 - 1.0).abs() < 1e-10);
+
+        // y = [1,2,3], y_pred = [2,3,4] -> SS_res = 1, SS_tot = 2, R² = 1 - 1/2 = 0.5
+        let y_true2 = vec![1.0, 2.0, 3.0];
+        let y_pred2 = vec![2.0, 3.0, 4.0];
+        let r2_2 = r2_score(&y_true2, &y_pred2).unwrap();
+        assert!((r2_2 - 0.5).abs() < 1e-10);
+    }
+
+    #[test]
+    fn test_mse_formula_verification() {
+        // MSE = (1/n) * Σ(y_true - y_pred)²
+        // y_true = [0, 1, 2], y_pred = [1, 2, 3] -> errors = [-1, -1, -1] -> MSE = (1+1+1)/3 = 1
+        let y_true = vec![0.0, 1.0, 2.0];
+        let y_pred = vec![1.0, 2.0, 3.0];
+        let mse = mean_squared_error(&y_true, &y_pred).unwrap();
+        assert!((mse - 1.0).abs() < 1e-10);
+    }
+
+    #[test]
+    fn test_rmse_sqrt_relationship() {
+        // RMSE should equal sqrt(MSE)
+        let y_true = vec![0.0, 1.0, 2.0];
+        let y_pred = vec![1.0, 2.0, 3.0];
+        let mse = mean_squared_error(&y_true, &y_pred).unwrap();
+        let rmse = root_mean_squared_error(&y_true, &y_pred).unwrap();
+        assert!((rmse - mse.sqrt()).abs() < 1e-10);
+    }
+
+    #[test]
+    fn test_mae_formula_verification() {
+        // MAE = (1/n) * Σ|y_true - y_pred|
+        // y_true = [0, 1, 2], y_pred = [1, 2, 4] -> errors = [1, 1, 2] -> MAE = 4/3
+        let y_true = vec![0.0, 1.0, 2.0];
+        let y_pred = vec![1.0, 2.0, 4.0];
+        let mae = mean_absolute_error(&y_true, &y_pred).unwrap();
+        assert!((mae - 4.0/3.0).abs() < 1e-10);
+    }
 }

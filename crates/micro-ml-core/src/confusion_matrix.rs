@@ -215,4 +215,33 @@ mod tests {
     fn test_length_mismatch() {
         assert!(confusion_matrix_impl(&[0.0, 1.0], &[0.0]).is_err());
     }
+
+    // ML CORRECTNESS VALIDATION TESTS
+
+    #[test]
+    fn test_confusion_matrix_exact_values() {
+        // Verify exact confusion matrix values for binary classification
+        let y_true = vec![0.0, 0.0, 1.0, 1.0];
+        let y_pred = vec![0.0, 1.0, 0.0, 1.0];
+        // Result: TN=1, FP=1, FN=1, TP=1
+
+        let cm = confusion_matrix_impl(&y_true, &y_pred).unwrap();
+        let matrix = &cm[1..];
+
+        assert_eq!(matrix[0], 1.0); // TN: true=0, pred=0
+        assert_eq!(matrix[1], 1.0); // FP: true=0, pred=1
+        assert_eq!(matrix[2], 1.0); // FN: true=1, pred=0
+        assert_eq!(matrix[3], 1.0); // TP: true=1, pred=1
+    }
+
+    #[test]
+    fn test_accuracy_exact_calculation() {
+        // Accuracy = (TP + TN) / Total
+        // 3 correct / 4 total = 0.75
+        let y_true = vec![0.0, 0.0, 1.0, 1.0];
+        let y_pred = vec![0.0, 0.0, 1.0, 0.0];  // Last one wrong
+
+        let acc = accuracy_impl(&y_true, &y_pred);
+        assert!((acc - 0.75).abs() < 1e-10);
+    }
 }

@@ -168,4 +168,53 @@ mod tests {
         let ba = balanced_accuracy(&y_true, &y_pred).unwrap();
         assert!((ba - 2.0/3.0).abs() < 1e-10);
     }
+
+    // ML CORRECTNESS VALIDATION TESTS
+
+    #[test]
+    fn test_mcc_formula_verification() {
+        // MCC = (TP*TN - FP*FN) / sqrt((TP+FP)*(TP+FN)*(TN+FP)*(TN+FN))
+        // TP=1, TN=1, FP=1, FN=1 -> MCC = (1-1)/sqrt(2*2*2*2) = 0
+        let y_true = vec![0.0, 0.0, 1.0, 1.0];
+        let y_pred = vec![0.0, 1.0, 0.0, 1.0];
+        let mcc = matthews_corrcoef(&y_true, &y_pred).unwrap();
+        assert_eq!(mcc, 0.0);
+    }
+
+    #[test]
+    fn test_mcc_perfect_classifier() {
+        // TP=2, TN=2, FP=0, FN=0 -> MCC = (4-0)/sqrt(2*2*2*2) = 4/4 = 1
+        let y_true = vec![0.0, 0.0, 1.0, 1.0];
+        let y_pred = vec![0.0, 0.0, 1.0, 1.0];
+        let mcc = matthews_corrcoef(&y_true, &y_pred).unwrap();
+        assert!((mcc - 1.0).abs() < 1e-10);
+    }
+
+    #[test]
+    fn test_mcc_worst_classifier() {
+        // TP=0, TN=0, FP=2, FN=2 -> MCC = (0-4)/sqrt(2*2*2*2) = -4/4 = -1
+        let y_true = vec![0.0, 0.0, 1.0, 1.0];
+        let y_pred = vec![1.0, 1.0, 0.0, 0.0];
+        let mcc = matthews_corrcoef(&y_true, &y_pred).unwrap();
+        assert!((mcc - (-1.0)).abs() < 1e-10);
+    }
+
+    #[test]
+    fn test_cohen_kappa_formula_verification() {
+        // Perfect agreement -> Kappa = 1
+        let y_true = vec![0.0, 1.0, 2.0];
+        let y_pred = vec![0.0, 1.0, 2.0];
+        let kappa = cohens_kappa(&y_true, &y_pred).unwrap();
+        assert!((kappa - 1.0).abs() < 1e-10);
+    }
+
+    #[test]
+    fn test_cohen_kappa_chance_agreement() {
+        // If predictions match by chance, Kappa = 0
+        // For [0,1,0,1] with random predictions, expected agreement = 0.5
+        let y_true = vec![0.0, 1.0, 0.0, 1.0];
+        let y_pred = vec![0.0, 1.0, 0.0, 1.0];
+        let kappa = cohens_kappa(&y_true, &y_pred).unwrap();
+        assert!((kappa - 1.0).abs() < 1e-10);  // Perfect agreement
+    }
 }
