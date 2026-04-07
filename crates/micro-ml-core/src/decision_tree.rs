@@ -24,6 +24,9 @@ impl DecisionTreeModel {
     #[wasm_bindgen(getter)]
     pub fn depth(&self) -> usize { self.depth }
 
+    /// Number of features (public for use by other algorithms like feature importance)
+    pub fn n_features_val(&self) -> usize { self.n_features }
+
     #[wasm_bindgen(getter, js_name = "nNodes")]
     pub fn n_nodes(&self) -> usize { self.nodes.len() }
 
