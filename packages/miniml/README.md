@@ -5,7 +5,7 @@
 miniml combines **70+ ML algorithms** across **15 algorithm families** with **genetic algorithm feature selection** and **PSO hyperparameter optimization** — all in **~145KB gzipped** with **SIMD acceleration**.
 
 ```
-npm install miniml
+npm install @seanchatmangpt/wminml
 ```
 
 ---
@@ -24,7 +24,7 @@ npm install miniml
 ## Quick Start
 
 ```js
-import { autoFit, knnTrain, randomForestClassify } from 'miniml';
+import { autoFit, knnTrain, randomForestClassify } from '@seanchatmangpt/wminml';
 
 // AutoML automatically selects the best algorithm
 const model = await autoFit(X, y);
@@ -44,7 +44,7 @@ const result = await rf.predict(testPoint);
 ## AutoML
 
 ```js
-import { autoFit } from 'miniml';
+import { autoFit } from '@seanchatmangpt/wminml';
 
 // Automatically select and train best model
 const model = await autoFit(X, y, {
@@ -75,7 +75,7 @@ import {
   gradientBoostingClassify,
   naiveBayesTrain,
   logisticRegression
-} from 'miniml';
+} from '@seanchatmangpt/wminml';
 
 // k-Nearest Neighbors
 const knn = await knnTrain(X, y, nSamples, nFeatures, k);
@@ -104,7 +104,7 @@ import {
   kmeansPlus,
   dbscan,
   hierarchicalClustering
-} from 'miniml';
+} from '@seanchatmangpt/wminml';
 
 // K-Means
 const km = await kmeans(X, nFeatures, nClusters, maxIterations);
@@ -127,7 +127,7 @@ import {
   ridgeRegression,
   lassoRegression,
   polynomialRegression
-} from 'miniml';
+} from '@seanchatmangpt/wminml';
 
 // Linear Regression
 const lr = await linearRegression(X, y, nSamples, nFeatures);
@@ -151,7 +151,7 @@ import {
   robustScaler,
   labelEncoder,
   oneHotEncoder
-} from 'miniml';
+} from '@seanchatmangpt/wminml';
 
 // Standard Scaler (z-score normalization)
 const scaled = await standardScaler(X, nSamples, nFeatures);
@@ -178,7 +178,7 @@ import {
   computeSteadyState,
   hmmForward,
   metropolisHastings
-} from 'miniml';
+} from '@seanchatmangpt/wminml';
 
 // Monte Carlo Integration
 const integral = await mcIntegrate(fn, a, b, n, seed);
@@ -202,7 +202,7 @@ import {
   mannWhitneyU,
   chiSquareTest,
   oneWayAnova
-} from 'miniml';
+} from '@seanchatmangpt/wminml';
 
 // t-Test
 const t = await tTestOneSample(data, nullHypothesis, alpha);
@@ -218,7 +218,7 @@ import {
   rbfKernelMatrix,
   polynomialKernelMatrix,
   sigmoidKernelMatrix
-} from 'miniml';
+} from '@seanchatmangpt/wminml';
 
 // RBF Kernel Matrix
 const K = await rbfKernelMatrix(data, nSamples, nFeatures, gamma);
@@ -233,7 +233,7 @@ const K = await polynomialKernelMatrix(data, nSamples, nFeatures, degree, gamma,
 import {
   bayesianEstimate,
   bayesianLinearRegression
-} from 'miniml';
+} from '@seanchatmangpt/wminml';
 
 // Bayesian Estimation (MCMC)
 const posterior = await bayesianEstimate(logLikelihood, logPrior, nSamples, burnIn, seed, initial, proposalSd);
@@ -248,7 +248,7 @@ const blr = await bayesianLinearRegression(data, nFeatures, targets, priorPrecis
 import {
   gpFit,
   gpPredict
-} from 'miniml';
+} from '@seanchatmangpt/wminml';
 
 // Fit Gaussian Process
 const model = await gpFit(data, nFeatures, targets, kernelType, kernelParams, noise);
@@ -264,7 +264,7 @@ const pred = await gpPredict(model, xTest, nFeatures);
 import {
   kaplanMeier,
   coxProportionalHazards
-} from 'miniml';
+} from '@seanchatmangpt/wminml';
 
 // Kaplan-Meier Survival Curve
 const km = await kaplanMeier(times, events);
@@ -280,7 +280,7 @@ import {
   confusionMatrix,
   classificationReport,
   silhouetteScore
-} from 'miniml';
+} from '@seanchatmangpt/wminml';
 
 // Confusion Matrix
 const cm = await confusionMatrix(yTrue, yPred);

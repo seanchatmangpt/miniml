@@ -13,7 +13,7 @@
 miniml combines **70+ ML algorithms** across **15 algorithm families** with **genetic algorithm feature selection** and **PSO hyperparameter optimization** — all in **~145KB gzipped** with **SIMD acceleration**.
 
 ```
-npm install miniml
+npm install @seanchatmangpt/wminml
 ```
 
 ---
@@ -44,7 +44,7 @@ AutoML automatically finds the best algorithm and hyperparameters for your data:
 ### AutoML Quick Start
 
 ```js
-import { autoFit } from 'miniml';
+import { autoFit } from '@seanchatmangpt/wminml';
 
 // Automatically select and train the best model
 const model = await autoFit(X, y, {
@@ -248,7 +248,7 @@ const prediction = await model.predict(testPoint);
 Automatically identifies the optimal feature subset:
 
 ```js
-import { geneticFeatureSelection } from 'miniml';
+import { geneticFeatureSelection } from '@seanchatmangpt/wminml';
 
 const result = await geneticFeatureSelection(X, y, {
   populationSize: 50,
@@ -270,7 +270,7 @@ console.log(result.originalScore);     // 0.87 (without feature selection)
 Optimize algorithm parameters with particle swarm optimization:
 
 ```js
-import { psoOptimize } from 'miniml';
+import { psoOptimize } from '@seanchatmangpt/wminml';
 
 const result = await psoOptimize({
   objectiveFn: async (params) => {
@@ -295,7 +295,7 @@ console.log(result.bestScore);   // 0.96
 Global optimization for complex landscapes:
 
 ```js
-import { simulatedAnnealing } from 'miniml';
+import { simulatedAnnealing } from '@seanchatmangpt/wminml';
 
 const result = await simulatedAnnealing({
   objectiveFn: async (state) => evaluateState(state),
@@ -343,13 +343,13 @@ All benchmarks run in WASM with SIMD acceleration:
 ### Installation
 
 ```bash
-npm install miniml
+npm install @seanchatmangpt/wminml
 ```
 
 ### Basic Usage
 
 ```js
-import { autoFit, knnTrain, randomForestClassify, standardScaler } from 'miniml';
+import { autoFit, knnTrain, randomForestClassify, standardScaler } from '@seanchatmangpt/wminml';
 
 // 1. AutoML (recommended)
 const model = await autoFit(X, y);
@@ -419,4 +419,4 @@ BSL 1.1 — See [LICENSE](LICENSE) for details.
 ## Links
 
 - [GitHub](https://github.com/seanchatmangpt/miniml)
-- [npm package](https://www.npmjs.com/package/miniml)
+- [npm package](https://www.npmjs.com/package/@seanchatmangpt/wminml)
