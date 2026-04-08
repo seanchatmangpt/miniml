@@ -57,6 +57,9 @@ pub mod theil_sen;
 pub mod mini_batch_kmeans;
 pub mod agglomerative_complete;
 pub mod permutation_importance;
+pub mod weibull;
+pub mod drift_detection;
+pub mod ngram;
 
 use wasm_bindgen::prelude::*;
 pub use error::MlError;
@@ -122,3 +125,6 @@ pub use spectral::*;
 pub use mini_batch_kmeans::*;
 pub use agglomerative_complete::*;
 pub use permutation_importance::*;
+pub use weibull::*;
+pub use drift_detection::*;
+pub use ngram::*;
