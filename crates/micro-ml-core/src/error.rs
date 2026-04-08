@@ -20,3 +20,5 @@ impl fmt::Display for MlError {
     }
 }
 
+impl std::error::Error for MlError {}
+
