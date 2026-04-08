@@ -340,6 +340,128 @@ Final slope = median of all pairwise slopes.
 
 ---
 
+## Weibull Survival Analysis
+
+**Formula:** `S(t) = exp(-(t/λ)^k)`
+
+- **Shape parameter k:** Controls hazard function behavior
+  - k < 1: Decreasing hazard (infant mortality)
+  - k = 1: Constant hazard (exponential distribution)
+  - k > 1: Increasing hazard (aging/wear-out)
+- **Scale parameter λ:** Characteristic life scale
+
+**Hazard rate:** `h(t) = (k/λ) * (t/λ)^(k-1)`
+
+**Gamma function:** Lanczos approximation with g=7 coefficients for scale estimation.
+
+| Metric | Value |
+|--------|-------|
+| Time | O(n) |
+| Space | O(1) |
+| WASM impact | ~3KB |
+
+**Use cases:** Reliability engineering, churn prediction, time-to-event modeling
+
+---
+
+## EWMA Drift Detection
+
+**Formula:** `ewma_t = λ * value + (1-λ) * ewma_{t-1}`
+
+Drift detected when: `|ewma_t - expected| > threshold`
+
+Exponentially Weighted Moving Average (EWMA) gives more weight to recent observations while maintaining smooth trend estimates.
+
+| Metric | Value |
+|--------|-------|
+| Time | O(n) single-pass |
+| Space | O(1) |
+| WASM impact | ~2KB |
+
+**Use cases:** Data pipeline monitoring, model performance tracking, concept drift detection
+
+---
+
+## Jaccard Drift Detection
+
+**Formula:** `J(A,B) = |A ∩ B| / |A ∪ B|`
+
+Window-based drift detection for categorical data:
+1. Maintain reference window of categorical values
+2. Compute Jaccard similarity with current window
+3. Signal drift when similarity drops below threshold
+
+| Metric | Value |
+|--------|-------|
+| Time | O(n * w²) where w is window size |
+| Space | O(w * f) |
+| WASM impact | ~3KB |
+
+**Use cases:** Categorical data stream monitoring, feature distribution shift detection
+
+---
+
+## NGram Sequence Prediction
+
+**Formula:** `P(next|context) = count(context→next) / count(context)`
+
+Markov chain of order n for sequence prediction:
+- **Unigram (n=1):** No context, predict based on global frequency
+- **Bigram (n=2):** Predict based on previous item
+- **Trigram (n=3):** Predict based on previous 2 items
+
+**Laplace smoothing:** `P_smooth = (count + 1) / (total + V)` where V is vocabulary size.
+
+**Perplexity:** `exp(-1/N * Σ(log(P)))` — lower is better.
+
+| Metric | Value |
+|--------|-------|
+| Time | O(n * L) where L is sequence length |
+| Space | O(V^n) where V is vocabulary size |
+| WASM impact | ~4KB |
+
+**Use cases:** Process mining (next activity prediction), text prediction, recommendation systems
+
+---
+
+## Z-Score Drift Detection
+
+**Formula:** `z = (window_mean - baseline_mean) / baseline_std`
+
+Drift detected when: `|z| > threshold`
+
+Statistical method for detecting mean shifts in continuous data streams using sliding window analysis.
+
+| Metric | Value |
+|--------|-------|
+| Time | O(n * w) |
+| Space | O(w) |
+| WASM impact | ~2KB |
+
+**Use cases:** Quality control, sensor monitoring, anomaly detection in metrics
+
+---
+
+## Page-Hinkley Test
+
+**Formula:** `PH = max_cumulative - min_cumulative`
+
+Cumulative sum-based change detection:
+1. Compute deviations from mean: `d_i = value_i - mean`
+2. Track cumulative sum: `S_t = Σ(d_i)`
+3. Monitor range: `PH_t = max(S) - min(S)`
+4. Signal change when PH exceeds threshold
+
+| Metric | Value |
+|--------|-------|
+| Time | O(n) single-pass |
+| Space | O(1) |
+| WASM impact | ~2KB |
+
+**Use cases:** Sudden change detection, monitoring streaming metrics, break point detection
+
+---
+
 ## References
 
 - Friedman, J. (2001). Greedy Function Approximation: A Gradient Boosting Machine.

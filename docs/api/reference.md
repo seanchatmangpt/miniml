@@ -1,6 +1,6 @@
 # API Reference
 
-Complete listing of all 59 modules and their exported functions.
+Complete listing of all 62 modules and their exported functions.
 
 ## Convention
 
@@ -263,3 +263,86 @@ Local Outlier Factor scores. Negative = outlier.
 
 ### `detectSeasonality(data)` → `SeasonalityInfo`
 - Returns: `{ period, strength }`
+
+---
+
+## Survival Analysis
+
+### `weibullFit(data, nSamples)` → `WeibullModel`
+Weibull distribution fitting for time-to-event data.
+- `data: Float64Array` - Time-to-event values (survival times)
+- `nSamples: number` - Number of samples
+- Returns: `{ shape, scale, hazardRate(t), survivalProbability(t), cumulativeHazard(t), medianRemaining(t), percentile(p) }`
+
+**Shape parameter interpretation:**
+- k < 1: Decreasing hazard (infant mortality)
+- k = 1: Constant hazard (exponential)
+- k > 1: Increasing hazard (aging/wear-out)
+
+### `weibullSurvival(data, nSamples, timePoints)` → `Vec<f64>`
+Compute survival probabilities at multiple time points.
+
+### `weibullHazardRates(data, nSamples, timePoints)` → `Vec<f64>`
+Compute hazard rates at multiple time points.
+
+### `weibullPercentiles(data, nSamples, percentiles)` → `Vec<f64>`
+Compute distribution quantiles (e.g., median at p=0.5).
+
+### `exponentialFit(data, nSamples)` → `WeibullModel`
+Exponential distribution (Weibull with k=1, constant hazard).
+
+---
+
+## Drift Detection
+
+### `ewmaDetector(lambda, expected, stdErr)` → `EwmaDetector`
+Create EWMA drift detector for online monitoring.
+- `lambda: number` - Smoothing factor (0 < λ ≤ 1). Smaller = more history weight.
+- `expected: number` - Target value (initial EWMA)
+- `stdErr: number` - Threshold for drift detection
+- Returns: `{ lambda, expected, stdErr, currentEwma, driftCount, update(value), reset() }`
+
+### `ewmaDriftDetection(data, nSamples, lambda, expected, stdErr, burnIn)` → `Vec<number>`
+Batch EWMA drift detection - returns indices where drift detected.
+- `burnIn: number` - Samples to skip before detecting drift
+
+### `jaccardDriftDetector(windowSize, threshold)` → `JaccardDriftDetector`
+Create Jaccard similarity drift detector for categorical data.
+- `windowSize: number` - Size of sliding window
+- `threshold: number` - Jaccard similarity threshold (0-1). Drift if similarity < threshold.
+- Returns: `{ windowSize, threshold, driftCount, update(window, nSamples), reset() }`
+
+### `jaccardDriftDetection(data, nFeatures, nSamples, windowSize, threshold)` → `Vec<number>`
+Batch Jaccard drift detection for categorical time series.
+
+### `zscoreDriftDetection(data, nSamples, windowSize, threshold)` → `Vec<number>`
+Z-score based drift detection - detects mean shifts in continuous data.
+
+### `pageHinkleyDriftDetection(data, nSamples, threshold)` → `Vec<number>`
+Page-Hinkley test for sudden change point detection via cumulative sums.
+
+---
+
+## Sequence Prediction
+
+### `ngramFit(sequences, sequenceLengths, n)` → `NGramModel`
+Fit n-gram model for sequence prediction (Markov chain of order n).
+- `sequences: Uint32Array` - Flat array where each sequence is concatenated
+- `sequenceLengths: Uint32Array` - Length of each sequence (for splitting)
+- `n: number` - Order of the n-gram (1=unigram, 2=bigram, 3=trigram)
+- Returns: `{ n, vocabSize, getVocabulary(), predict(context, k), probability(context, nextItem), toString() }`
+
+**Context handling:**
+- If context length ≥ n: Uses last n-1 items as context
+- If context length < n: Uses entire context
+
+### `ngramPredictBatch(sequences, sequenceLengths, n, k)` → `Vec<number>`
+Batch prediction - predicts last element for each sequence.
+- `k: number` - Number of top predictions to return
+
+### `ngramProbabilitySmooth(sequences, sequenceLengths, n, context, nextItem)` → `number`
+Laplace-smoothed probability - prevents zero probability for unseen transitions.
+- Formula: `(count + 1) / (total + vocabSize)`
+
+### `ngramPerplexity(sequences, sequenceLengths, n)` → `number`
+Compute perplexity - lower is better (measures model fit).
