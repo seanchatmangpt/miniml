@@ -1,12 +1,12 @@
 {
-  "name": "micro-ml-monorepo",
+  "name": "miniml-monorepo",
   "private": true,
   "packageManager": "pnpm@9.15.0",
   "scripts": {
     "build": "turbo run build",
-    "build:wasm": "cd crates/micro-ml-core && wasm-pack build --target web --out-dir ../../packages/micro-ml/wasm",
+    "build:wasm": "cd crates/miniml-core && wasm-pack build --target web --out-dir ../../packages/miniml/wasm",
     "test": "turbo run test",
-    "test:rust": "cd crates/micro-ml-core && cargo test",
+    "test:rust": "cd crates/miniml-core && cargo test",
     "bench": "turbo run bench",
     "clean": "turbo run clean && rm -rf node_modules",
     "typecheck": "turbo run typecheck"
