@@ -1,5 +1,5 @@
 {
-  "name": "wminml",
+  "name": "@seanchatmangpt/wminml",
   "version": "26.4.8",
   "description": "70+ ML algorithms across 15 families with AutoML, SIMD acceleration, and zero dependencies. Rust/WASM, browser + Node.",
   "type": "module",
