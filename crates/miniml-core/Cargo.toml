@@ -1,5 +1,5 @@
 [package]
-name = "miniml-core"
+name = "wminml"
 version = "26.4.8"
 edition = "2021"
 authors = ["Sean Chatman <info@chatmangpt.com>"]
