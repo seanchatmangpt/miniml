@@ -1,5 +1,4 @@
 use wasm_bindgen::prelude::*;
-use crate::error::MlError;
 use crate::matrix::validate_matrix;
 
 /// Robust Scaler - Scale features using median and IQR (robust to outliers)
@@ -19,6 +18,9 @@ impl RobustScaler {
     #[wasm_bindgen(getter, js_name = "nSamples")]
     pub fn n_samples(&self) -> usize { self.n_samples }
 
+    /// Returns the median (center) values per feature
+    pub fn center(&self) -> Vec<f64> { self.center.clone() }
+
     /// Fit scaler to data (compute median and IQR per feature)
     #[wasm_bindgen]
     pub fn fit(&mut self, data: &[f64]) -> Result<(), JsError> {
@@ -29,7 +31,7 @@ impl RobustScaler {
             let mut values: Vec<f64> = (0..n).map(|i| data[i * self.n_features + f]).collect();
             values.sort_unstable_by(|a, b| a.partial_cmp(b).unwrap());
 
-            let median = if values.len() % 2 == 0 {
+            let median = if values.len().is_multiple_of(2) {
                 (values[values.len() / 2 - 1] + values[values.len() / 2]) / 2.0
             } else {
                 values[values.len() / 2]

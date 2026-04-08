@@ -37,7 +37,7 @@ pub fn hierarchical_impl(
 
         for i in 0..clusters.len() {
             for j in (i + 1)..clusters.len() {
-                let dist = cluster_distance(&data, n_features, &clusters[i], &clusters[j]);
+                let dist = cluster_distance(data, n_features, &clusters[i], &clusters[j]);
                 if dist < best_dist {
                     best_dist = dist;
                     best_i = i;
@@ -47,7 +47,8 @@ pub fn hierarchical_impl(
         }
 
         // Merge best_j into best_i
-        clusters[best_i].extend(&clusters[best_j]);
+        let to_merge = clusters[best_j].clone();
+        clusters[best_i].extend(&to_merge);
         clusters.remove(best_j);
     }
 

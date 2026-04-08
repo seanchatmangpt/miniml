@@ -22,6 +22,9 @@ impl RidgeRegression {
     #[wasm_bindgen(getter, js_name = "intercept")]
     pub fn intercept_js(&self) -> f64 { self.intercept }
 
+    /// Returns the learned coefficients
+    pub fn coefficients(&self) -> Vec<f64> { self.coefficients.clone() }
+
     /// Predict target values
     #[wasm_bindgen]
     pub fn predict(&self, data: &[f64]) -> Vec<f64> {
@@ -86,7 +89,7 @@ pub fn ridge_regression_impl(
 
     // Compute intercept (mean(y) - sum(coef * mean(x)))
     let mut mean_y = 0.0;
-    for &t in &targets { mean_y += t; }
+    for t in targets { mean_y += t; }
     mean_y /= n as f64;
 
     let mut mean_x = vec![0.0f64; n_features];
@@ -177,6 +180,9 @@ impl LassoRegression {
     #[wasm_bindgen(getter, js_name = "intercept")]
     pub fn intercept_js(&self) -> f64 { self.intercept }
 
+    /// Returns the learned coefficients
+    pub fn coefficients(&self) -> Vec<f64> { self.coefficients.clone() }
+
     /// Predict target values
     #[wasm_bindgen]
     pub fn predict(&self, data: &[f64]) -> Vec<f64> {
@@ -224,7 +230,7 @@ pub fn lasso_regression_impl(
     }
 
     let mut mean_y = 0.0;
-    for &t in &targets { mean_y += t; }
+    for t in targets { mean_y += t; }
     mean_y /= n as f64;
 
     let mut centered_data = vec![0.0f64; data.len()];
@@ -234,14 +240,14 @@ pub fn lasso_regression_impl(
         }
     }
 
-    let mut centered_targets: Vec<f64> = targets.iter().map(|&t| t - mean_y).collect();
+    let centered_targets: Vec<f64> = targets.iter().map(|&t| t - mean_y).collect();
 
     // Coordinate descent
     let mut coefficients = vec![0.0f64; n_features];
     let mut residuals = centered_targets.clone();
 
     for _iter in 0..max_iter {
-        let mut max_change = 0.0;
+        let mut max_change: f64 = 0.0;
 
         for f in 0..n_features {
             // Compute feature norm squared
@@ -279,7 +285,7 @@ pub fn lasso_regression_impl(
                 residuals[i] -= delta * centered_data[i * n_features + f];
             }
 
-            max_change = max_change.max(delta.abs());
+            max_change = max_change.max(delta.abs() as f64);
         }
 
         if max_change < tol {

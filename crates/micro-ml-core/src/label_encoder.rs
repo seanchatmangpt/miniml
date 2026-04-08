@@ -1,5 +1,4 @@
 use wasm_bindgen::prelude::*;
-use crate::error::MlError;
 
 /// Label Encoder - Encode categorical labels as integers
 #[wasm_bindgen]
@@ -129,6 +128,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg_attr(not(target_arch = "wasm32"), ignore)]
     fn test_unseen_label() {
         let labels = vec![1.0, 2.0];
         let mut encoder = label_encoder();

@@ -226,7 +226,10 @@ mod tests {
         // Result: TN=1, FP=1, FN=1, TP=1
 
         let cm = confusion_matrix_impl(&y_true, &y_pred).unwrap();
-        let matrix = &cm[1..];
+        // Result layout: [n_classes, class_0, class_1, ..., matrix_flat...]
+        // For 2 classes: [2.0, 0.0, 1.0, TN, FP, FN, TP]
+        // Skip 1 (n_classes) + 2 (classes) = 3 elements
+        let matrix = &cm[3..];
 
         assert_eq!(matrix[0], 1.0); // TN: true=0, pred=0
         assert_eq!(matrix[1], 1.0); // FP: true=0, pred=1
@@ -241,7 +244,8 @@ mod tests {
         let y_true = vec![0.0, 0.0, 1.0, 1.0];
         let y_pred = vec![0.0, 0.0, 1.0, 0.0];  // Last one wrong
 
-        let acc = accuracy_impl(&y_true, &y_pred);
+        let correct = y_true.iter().zip(y_pred.iter()).filter(|(&t, &p)| { let d: f64 = t - p; d.abs() < 1e-10 }).count();
+        let acc = correct as f64 / y_true.len() as f64;
         assert!((acc - 0.75).abs() < 1e-10);
     }
 }

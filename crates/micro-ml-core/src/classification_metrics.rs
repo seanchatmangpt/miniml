@@ -26,8 +26,8 @@ pub fn matthews_corrcoef(y_true: &[f64], y_pred: &[f64]) -> Result<f64, JsError>
         }
     }
 
-    let numerator = (tp * tn - fp * fn_count) as f64;
-    let denominator = ((tp + fp) * (tp + fn_count) * (tn + fp) * (tn + fn_count)) as f64;
+    let numerator = tp as f64 * tn as f64 - fp as f64 * fn_count as f64 ;
+    let denominator = (tp + fp) as f64 * (tp + fn_count) as f64 * (tn + fp) as f64 * (tn + fn_count) as f64 ;
 
     if denominator == 0.0 {
         return Ok(0.0);  // Undefined case
@@ -76,7 +76,7 @@ pub fn cohens_kappa(y_true: &[f64], y_pred: &[f64]) -> Result<f64, JsError> {
             .map(|j| observed[j])
             .sum();
         let col_sum: usize = (0..n_classes)
-            .filter(|j| i < n_classes)
+            .filter(|_j| i < n_classes)
             .map(|j| observed[j * n_classes + i])
             .sum();
 

@@ -1,5 +1,4 @@
 use wasm_bindgen::prelude::*;
-use crate::error::MlError;
 use crate::matrix::validate_matrix;
 
 /// MinMax Scaler - Transform features to [0, 1] range
@@ -160,9 +159,13 @@ mod tests {
         let mut scaler = minmax_scaler(2);
         let transformed = scaler.fit_transform(&data).unwrap();
 
-        // Feature 0 is constant, should map to 0.5 (or handle gracefully)
-        // Feature 1 should scale normally
-        assert!((transformed[1] - 0.0).abs() < 1e-10);
-        assert!((transformed[3] - 1.0).abs() < 1e-10);
+        // Feature 0 is constant (all 5.0), scale=1.0 -> (5-5)*1 = 0.0 for all rows
+        assert!((transformed[0] - 0.0).abs() < 1e-10);
+        assert!((transformed[2] - 0.0).abs() < 1e-10);
+        assert!((transformed[4] - 0.0).abs() < 1e-10);
+        // Feature 1: [1,2,3] -> min=1, max=3, scale=0.5
+        assert!((transformed[1] - 0.0).abs() < 1e-10);   // (1-1)*0.5 = 0
+        assert!((transformed[3] - 0.5).abs() < 1e-10);   // (2-1)*0.5 = 0.5
+        assert!((transformed[5] - 1.0).abs() < 1e-10);   // (3-1)*0.5 = 1.0
     }
 }

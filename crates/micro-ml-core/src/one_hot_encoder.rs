@@ -1,5 +1,4 @@
 use wasm_bindgen::prelude::*;
-use crate::error::MlError;
 
 /// One-Hot Encoder - Encode categorical features as binary vectors
 #[wasm_bindgen]
@@ -53,7 +52,7 @@ impl OneHotEncoder {
         }
 
         let n_samples = data.len() / self.n_features;
-        let total_categories = self.categories.iter().map(|c| c.len()).sum();
+        let total_categories: usize = self.categories.iter().map(|c| c.len()).sum();
         let mut result = Vec::with_capacity(n_samples * total_categories);
 
         for i in 0..n_samples {
@@ -129,10 +128,10 @@ mod tests {
         let mut encoder = one_hot_encoder(2);
         let transformed = encoder.fit_transform(&data).unwrap();
 
-        // First row: [0, 10] -> [1,0, 1,0,0]
-        assert_eq!(transformed[0..6].to_vec(), vec![1.0, 0.0, 1.0, 0.0, 0.0]);
+        // First row: [0, 10] -> [1,0, 1,0,0] (5 values: 2 for feature 0, 3 for feature 1)
+        assert_eq!(transformed[0..5].to_vec(), vec![1.0, 0.0, 1.0, 0.0, 0.0]);
         // Second row: [1, 20] -> [0,1, 0,1,0]
-        assert_eq!(transformed[6..12].to_vec(), vec![0.0, 1.0, 0.0, 1.0, 0.0]);
+        assert_eq!(transformed[5..10].to_vec(), vec![0.0, 1.0, 0.0, 1.0, 0.0]);
     }
 
     #[test]

@@ -1,6 +1,6 @@
 use wasm_bindgen::prelude::*;
 use crate::error::MlError;
-use crate::matrix::{validate_matrix, euclidean_dist_sq, Rng};
+use crate::matrix::{validate_matrix, Rng};
 
 /// K-Means++ Clustering (improved initialization)
 /// Returns cluster assignments and final centroids
@@ -31,9 +31,9 @@ pub fn kmeans_plus_impl(
     let mut centroids = initialize_centroids_plus_plus(data, n_features, n_clusters, n)?;
 
     // Standard K-Means iterations
+    let mut assignments = vec![0usize; n];
     for _iter in 0..max_iter {
         // Assign samples to nearest centroid
-        let mut assignments = vec![0usize; n];
         let mut changed = false;
 
         for i in 0..n {
@@ -107,7 +107,7 @@ fn initialize_centroids_plus_plus(
     let mut rng = Rng::from_data(data);
 
     // Choose first centroid randomly
-    let first_idx = (rng.next() * n_samples as f64) as usize % n_samples;
+    let first_idx = (rng.next_f64() * n_samples as f64) as usize % n_samples;
     let first_centroid: Vec<f64> = (0..n_features)
         .map(|f| data[first_idx * n_features + f])
         .collect();
@@ -134,7 +134,7 @@ fn initialize_centroids_plus_plus(
         }
 
         // Select next centroid with probability proportional to distance
-        let mut select = rng.next() * total_dist;
+        let mut select = rng.next_f64() * total_dist;
         let mut selected_idx = 0;
 
         for (i, &dist) in min_distances.iter().enumerate() {

@@ -1,6 +1,5 @@
 use wasm_bindgen::prelude::*;
 use crate::error::MlError;
-use crate::matrix::{validate_matrix, euclidean_dist_sq};
 
 /// ROC AUC (Area Under ROC Curve) for binary classification
 /// Returns AUC score in [0, 1] where 1 = perfect classifier
@@ -18,39 +17,32 @@ pub fn roc_auc_score(y_true: &[f64], y_scores: &[f64]) -> Result<f64, JsError> {
 }
 
 pub fn roc_auc_impl(y_true: &[f64], y_scores: &[f64]) -> Result<f64, MlError> {
-    // Sort by score descending
     let n = y_true.len();
-    let mut indexed: Vec<(usize, f64)> = y_scores.iter().enumerate().map(|(i, &s)| (i, *s)).collect();
-    indexed.sort_unstable_by(|a, b| b.1.partial_cmp(&a.1).unwrap());
+    let total_pos = y_true.iter().filter(|&&y| y > 0.5).count();
+    let total_neg = n - total_pos;
 
-    // Calculate AUC using trapezoidal rule
-    let mut auc = 0.0;
-    let mut tp = 0.0;
-    let mut fp = 0.0;
-    let mut prev_tp = 0.0;
-    let mut prev_fp = 0.0;
-
-    for (idx, _score) in &indexed {
-        if y_true[*idx] > 0.5 {
-            tp += 1.0;
-        } else {
-            fp += 1.0;
-        }
-        // Trapezoid area
-        auc += (tp + prev_tp) * (fp - prev_fp) / 2.0;
-        prev_tp = tp;
-        prev_fp = fp;
-    }
-
-    // Normalize by total positives × negatives
-    let total_tp = y_true.iter().filter(|&y| *y > 0.5).count() as f64;
-    let total_fp = y_true.iter().filter(|&y| *y <= 0.5).count() as f64;
-
-    if total_tp == 0.0 || total_fp == 0.0 {
+    if total_pos == 0 || total_neg == 0 {
         return Ok(0.0); // Undefined
     }
 
-    Ok(auc / (total_tp * total_fp))
+    // Use Mann-Whitney U statistic: AUC = P(score_pos > score_neg)
+    // Tied scores count as 0.5
+    let mut pairs_won = 0.0_f64;
+    for i in 0..n {
+        if y_true[i] > 0.5 {
+            for j in 0..n {
+                if y_true[j] <= 0.5 {
+                    if y_scores[i] > y_scores[j] {
+                        pairs_won += 1.0;
+                    } else if (y_scores[i] - y_scores[j]).abs() < 1e-10 {
+                        pairs_won += 0.5;
+                    }
+                }
+            }
+        }
+    }
+
+    Ok(pairs_won / (total_pos as f64 * total_neg as f64))
 }
 
 /// Log Loss (Cross-Entropy) for probabilistic classification
@@ -99,8 +91,10 @@ mod tests {
     #[test]
     fn test_log_loss() {
         let y_true = vec![0.0, 1.0, 0.0, 1.0];
-        // Perfect predictions
-        let y_proba = vec![0.9, 0.1, 0.8, 0.2];
+        // y_proba layout: [n_samples * n_classes] = [4 * 2] = 8 elements
+        // Sample 0 (class 0): [0.9, 0.1], Sample 1 (class 1): [0.1, 0.9]
+        // Sample 2 (class 0): [0.8, 0.2], Sample 3 (class 1): [0.2, 0.8]
+        let y_proba = vec![0.9, 0.1, 0.1, 0.9, 0.8, 0.2, 0.2, 0.8];
         let loss = log_loss(&y_true, &y_proba, 2).unwrap();
         // Should be low (good predictions)
         assert!(loss < 1.0);

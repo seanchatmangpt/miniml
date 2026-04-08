@@ -1,6 +1,6 @@
 use wasm_bindgen::prelude::*;
 use crate::error::MlError;
-use crate::matrix::{validate_matrix, mat_get};
+use crate::matrix::validate_matrix;
 
 /// AdaBoost Classifier - Adaptive Boosting
 /// Ensemble of weighted weak learners (decision stumps)
@@ -172,6 +172,7 @@ fn find_best_stump(
     let mut best_threshold = 0.0;
     let mut best_pred = 1.0;
     let mut min_error = f64::INFINITY;
+    let mut total_weight = 0.0;
 
     for f in 0..n_features {
         // Try each sample as threshold
@@ -181,7 +182,7 @@ fn find_best_stump(
             // Predict -1 for <= threshold, 1 for >
             let mut error_pos = 0.0;
             let mut error_neg = 0.0;
-            let mut total_weight = 0.0;
+            total_weight = 0.0;
 
             for j in 0..n {
                 let val = data[j * n_features + f];

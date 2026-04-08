@@ -62,7 +62,7 @@ pub fn median_absolute_error(y_true: &[f64], y_pred: &[f64]) -> Result<f64, JsEr
         .collect();
     errors.sort_unstable_by(|a, b| a.partial_cmp(b).unwrap());
 
-    let median = if errors.len() % 2 == 0 {
+    let median = if errors.len().is_multiple_of(2) {
         (errors[errors.len() / 2 - 1] + errors[errors.len() / 2]) / 2.0
     } else {
         errors[errors.len() / 2]
@@ -153,11 +153,11 @@ mod tests {
         let r2 = r2_score(&y_true, &y_pred).unwrap();
         assert!((r2 - 1.0).abs() < 1e-10);
 
-        // y = [1,2,3], y_pred = [2,3,4] -> SS_res = 1, SS_tot = 2, R² = 1 - 1/2 = 0.5
+        // y = [1,2,3], y_pred = [2,3,4] -> mean=2, SS_tot = 2, SS_res = 3, R² = 1 - 3/2 = -0.5
         let y_true2 = vec![1.0, 2.0, 3.0];
         let y_pred2 = vec![2.0, 3.0, 4.0];
         let r2_2 = r2_score(&y_true2, &y_pred2).unwrap();
-        assert!((r2_2 - 0.5).abs() < 1e-10);
+        assert!((r2_2 - (-0.5)).abs() < 1e-10);
     }
 
     #[test]
