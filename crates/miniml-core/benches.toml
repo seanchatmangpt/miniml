@@ -1,3 +1,0 @@
-[[bin]]
-name = "bench_all"
-path = "benches/simple_bench.rs"

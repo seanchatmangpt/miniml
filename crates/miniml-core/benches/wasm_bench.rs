@@ -9,7 +9,7 @@ use std::time::{Duration, Instant};
 use criterion::{black_box, criterion_group, criterion_main, Criterion, BenchmarkId};
 
 // Import all algorithms
-use miniml_core::{
+use wminml::{
     // Classification
     knn_fit_impl, KnnModel,
     decision_tree_impl, DecisionTreeModel,

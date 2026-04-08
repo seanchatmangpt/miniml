@@ -1,4 +1,4 @@
-//! Trustworthy Comprehensive Performance Benchmarks — miniml-core
+//! Trustworthy Comprehensive Performance Benchmarks — wminml
 //!
 //! Uses warmup + repeated iterations with nanosecond precision.
 //! Prevents dead-code elimination via std::hint::black_box.
@@ -18,14 +18,14 @@
 use std::hint::black_box;
 use std::time::Instant;
 
-use miniml_core::*;
-use miniml_core::optimization::genetic::GeneticAlgorithm;
-use miniml_core::optimization::genetic::rand_f64;
-use miniml_core::optimization::pso::PSO;
-use miniml_core::optimization::annealing::SimulatedAnnealing;
-use miniml_core::optimization::drift::*;
-use miniml_core::optimization::anomaly::*;
-use miniml_core::optimization::{FitnessFunction, Individual};
+use wminml::*;
+use wminml::optimization::genetic::GeneticAlgorithm;
+use wminml::optimization::genetic::rand_f64;
+use wminml::optimization::pso::PSO;
+use wminml::optimization::annealing::SimulatedAnnealing;
+use wminml::optimization::drift::*;
+use wminml::optimization::anomaly::*;
+use wminml::optimization::{FitnessFunction, Individual};
 
 // ── helpers ──────────────────────────────────────────────────────────
 
@@ -119,7 +119,7 @@ impl FitnessFunction<f64> for SphereFitness {
 fn main() {
     println!();
     println!("╔══════════════════════════════════════════════════════════════╗");
-    println!("║  miniml-core — Trustworthy Performance Benchmarks            ║");
+    println!("║  wminml — Trustworthy Performance Benchmarks            ║");
     println!("║  Methodology: warmup + N iterations, nanosecond precision    ║");
     println!("║  Anti-optimization: std::hint::black_box on all results     ║");
     println!("╚══════════════════════════════════════════════════════════════╝");

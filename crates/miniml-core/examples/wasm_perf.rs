@@ -4,7 +4,7 @@
 //! Uses _impl functions (pure Rust, no WASM dependency).
 
 use std::time::Instant;
-use miniml_core::*;
+use wminml::*;
 
 fn generate_data(n_samples: usize, n_features: usize) -> Vec<f64> {
     (0..n_samples * n_features)
