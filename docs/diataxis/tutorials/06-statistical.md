@@ -23,7 +23,7 @@ import {
   chiSquareTest,
   oneWayAnova,
   describe,
-} from 'miniml';
+} from '@seanchatmangpt/wminml';
 ```
 
 ---

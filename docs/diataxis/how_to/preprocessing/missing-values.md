@@ -48,7 +48,7 @@ function detectMissing(
 The `imputer` function fills missing values (represented as 0 in the input) with the specified strategy.
 
 ```typescript
-import { imputer } from "miniml";
+import { imputer } from "@seanchatmangpt/wminml";
 
 const nSamples = X.length / nFeatures;
 
@@ -74,7 +74,7 @@ const XConstant = imputer(X, nSamples, nFeatures, "constant");
 Different features may need different imputation. Use the `imputer` function once per feature, or impute the full matrix with a single strategy and override specific features.
 
 ```typescript
-import { imputer } from "miniml";
+import { imputer } from "@seanchatmangpt/wminml";
 
 // Apply different strategies to different feature ranges
 const XMean = imputer(X, nSamples, nFeatures, "mean"); // default for all

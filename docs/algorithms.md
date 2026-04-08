@@ -9,7 +9,7 @@ Complete reference for all 70+ algorithms in miniml across 15 families.
 Instance-based learning algorithm that classifies new cases based on similarity measure (e.g., distance functions).
 
 ```js
-import { knnTrain } from 'miniml';
+import { knnTrain } from '@seanchatmangpt/wminml';
 
 const knn = await knnTrain(X, y, nSamples, nFeatures, k);
 const prediction = await knn.predict(testPoint);
@@ -36,7 +36,7 @@ const prediction = await knn.predict(testPoint);
 Hierarchical tree-like model that splits data based on feature values.
 
 ```js
-import { decisionTreeTrain } from 'miniml';
+import { decisionTreeTrain } from '@seanchatmangpt/wminml';
 
 const dt = await decisionTreeTrain(X, y, nSamples, nFeatures, maxDepth);
 const prediction = await dt.predict(testPoint);
@@ -63,7 +63,7 @@ const prediction = await dt.predict(testPoint);
 Ensemble of decision trees trained via bagging (bootstrap aggregating).
 
 ```js
-import { randomForestClassify } from 'miniml';
+import { randomForestClassify } from '@seanchatmangpt/wminml';
 
 const rf = await randomForestClassify(X, y, nTrees, maxDepth);
 const prediction = await rf.predict(testPoint);
@@ -89,7 +89,7 @@ const prediction = await rf.predict(testPoint);
 Sequential ensemble that builds trees to correct errors of previous trees.
 
 ```js
-import { gradientBoostingClassify } from 'miniml';
+import { gradientBoostingClassify } from '@seanchatmangpt/wminml';
 
 const gb = await gradientBoostingClassify(X, y, nEstimators, maxDepth, learningRate);
 const prediction = await gb.predict(testPoint);
@@ -116,7 +116,7 @@ const prediction = await gb.predict(testPoint);
 Adaptive boosting that combines weak learners (typically shallow trees).
 
 ```js
-import { adaboostClassify } from 'miniml';
+import { adaboostClassify } from '@seanchatmangpt/wminml';
 
 const ada = await adaboostClassify(X, y, nEstimators);
 const prediction = await ada.predict(testPoint);
@@ -141,7 +141,7 @@ const prediction = await ada.predict(testPoint);
 Probabilistic classifier based on Bayes' theorem with independence assumption.
 
 ```js
-import { naiveBayesTrain } from 'miniml';
+import { naiveBayesTrain } from '@seanchatmangpt/wminml';
 
 const nb = await naiveBayesTrain(X, y, nSamples, nFeatures);
 const prediction = await nb.predict(testPoint);
@@ -167,7 +167,7 @@ const prediction = await nb.predict(testPoint);
 Linear classifier with sigmoid activation for binary classification.
 
 ```js
-import { logisticRegressionTrain } from 'miniml';
+import { logisticRegressionTrain } from '@seanchatmangpt/wminml';
 
 const lr = await logisticRegressionTrain(X, y, nSamples, nFeatures, maxIterations, learningRate);
 const prediction = await lr.predict(testPoint);
@@ -195,7 +195,7 @@ const prediction = await lr.predict(testPoint);
 Online learning algorithm with stochastic gradient descent.
 
 ```js
-import { perceptronTrain } from 'miniml';
+import { perceptronTrain } from '@seanchatmangpt/wminml';
 
 const p = await perceptronTrain(X, y, nSamples, nFeatures, maxIterations, learningRate);
 const prediction = await p.predict(testPoint);
@@ -223,7 +223,7 @@ const prediction = await p.predict(testPoint);
 Support vector machine with linear kernel.
 
 ```js
-import { linearSvmTrain } from 'miniml';
+import { linearSvmTrain } from '@seanchatmangpt/wminml';
 
 const svm = await linearSvmTrain(X, y, nSamples, nFeatures, lambda, maxIterations, learningRate);
 const prediction = await svm.predict(testPoint);
@@ -254,7 +254,7 @@ const prediction = await svm.predict(testPoint);
 Ordinary least squares regression.
 
 ```js
-import { linearRegression } from 'miniml';
+import { linearRegression } from '@seanchatmangpt/wminml';
 
 const result = await linearRegression(X, y, nSamples, nFeatures);
 const prediction = result.predict(testPoint);
@@ -280,7 +280,7 @@ const prediction = result.predict(testPoint);
 L2-regularized linear regression.
 
 ```js
-import { ridgeRegression } from 'miniml';
+import { ridgeRegression } from '@seanchatmangpt/wminml';
 
 const result = await ridgeRegression(X, y, alpha, nSamples, nFeatures);
 const prediction = result.predict(testPoint);
@@ -307,7 +307,7 @@ const prediction = result.predict(testPoint);
 L1-regularized linear regression via coordinate descent.
 
 ```js
-import { lassoRegression } from 'miniml';
+import { lassoRegression } from '@seanchatmangpt/wminml';
 
 const result = await lassoRegression(X, y, alpha, l1Ratio, maxIterations, tol, nSamples, nFeatures);
 const prediction = result.predict(testPoint);
@@ -335,7 +335,7 @@ const prediction = result.predict(testPoint);
 Nonlinear regression with polynomial features.
 
 ```js
-import { polynomialRegression } from 'miniml';
+import { polynomialRegression } from '@seanchatmangpt/wminml';
 
 const result = await polynomialRegression(X, y, nSamples, nFeatures, degree);
 const prediction = result.predict(testPoint);
@@ -362,7 +362,7 @@ const prediction = result.predict(testPoint);
 Fits exponential curve: y = a × e^(bx)
 
 ```js
-import { exponentialRegression } from 'miniml';
+import { exponentialRegression } from '@seanchatmangpt/wminml';
 
 const result = await exponentialRegression(X, y, nSamples);
 const prediction = result.predict(testPoint);
@@ -386,7 +386,7 @@ const prediction = result.predict(testPoint);
 Fits logarithmic curve: y = a + b × ln(x)
 
 ```js
-import { logarithmicRegression } from 'miniml';
+import { logarithmicRegression } from '@seanchatmangpt/wminml';
 
 const result = await logarithmicRegression(X, y, nSamples);
 const prediction = result.predict(testPoint);
@@ -410,7 +410,7 @@ const prediction = result.predict(testPoint);
 Fits power law: y = a × x^b
 
 ```js
-import { powerRegression } from 'miniml';
+import { powerRegression } from '@seanchatmangpt/wminml';
 
 const result = await powerRegression(X, y, nSamples);
 const prediction = result.predict(testPoint);
@@ -435,7 +435,7 @@ const prediction = result.predict(testPoint);
 Epsilon-SVR via PEGASOS-style subgradient descent.
 
 ```js
-import { svrFit } from 'miniml';
+import { svrFit } from '@seanchatmangpt/wminml';
 
 const model = await svrFit(X, y, nFeatures, targets, epsilon, c, maxIterations, learningRate, seed);
 const prediction = await model.predict(testPoint);
@@ -461,7 +461,7 @@ const prediction = await model.predict(testPoint);
 Predicts conditional quantiles via pinball loss + IRLS.
 
 ```js
-import { quantileRegressionFit } from 'miniml';
+import { quantileRegressionFit } from '@seanchatmangpt/wminml';
 
 const model = await quantileRegressionFit(X, y, nFeatures, targets, quantile, maxIterations, learningRate, tol);
 const prediction = await model.predict(testPoint);
@@ -487,7 +487,7 @@ const prediction = await model.predict(testPoint);
 Coordinate descent with combined L1+L2 penalty.
 
 ```js
-import { elasticNet } from 'miniml';
+import { elasticNet } from '@seanchatmangpt/wminml';
 
 const model = await elasticNet(X, y, nFeatures, targets, alpha, l1Ratio, maxIterations, tol);
 const prediction = await model.predict(testPoint);
@@ -515,7 +515,7 @@ const prediction = await model.predict(testPoint);
 Lloyd's algorithm for centroid-based clustering.
 
 ```js
-import { kmeans } from 'miniml';
+import { kmeans } from '@seanchatmangpt/wminml';
 
 const result = await kmeans(X, nFeatures, nClusters, maxIterations);
 const assignments = result.getAssignments();
@@ -542,7 +542,7 @@ const centroids = result.getCentroids();
 K-Means with improved initialization using probabilistic spreading.
 
 ```js
-import { kmeansPlus } from 'miniml';
+import { kmeansPlus } from '@seanchatmangpt/wminml';
 
 const result = await kmeansPlus(X, nClusters, maxIterations, nSamples, nFeatures);
 const assignments = result.getAssignments();
@@ -569,7 +569,7 @@ const assignments = result.getAssignments();
 Density-based spatial clustering with noise detection.
 
 ```js
-import { dbscan } from 'miniml';
+import { dbscan } from '@seanchatmangpt/wminml';
 
 const labels = await dbscan(X, nFeatures, eps, minPoints);
 ```
@@ -594,7 +594,7 @@ const labels = await dbscan(X, nFeatures, eps, minPoints);
 Agglomerative clustering with complete linkage.
 
 ```js
-import { hierarchicalClustering } from 'miniml';
+import { hierarchicalClustering } from '@seanchatmangpt/wminml';
 
 const labels = await hierarchicalClustering(X, nFeatures, nClusters);
 ```
@@ -620,7 +620,7 @@ const labels = await hierarchicalClustering(X, nFeatures, nClusters);
 Numerical integration via random sampling.
 
 ```js
-import { mcIntegrate } from 'miniml';
+import { mcIntegrate } from '@seanchatmangpt/wminml';
 
 const integral = await mcIntegrate(fn, a, b, n, seed);
 ```
@@ -646,7 +646,7 @@ const integral = await mcIntegrate(fn, a, b, n, seed);
 Bootstrap confidence intervals via resampling.
 
 ```js
-import { mcBootstrap } from 'miniml';
+import { mcBootstrap } from '@seanchatmangpt/wminml';
 
 const ci = await mcBootstrap(data, nBootstrap, statistic, confidence, seed);
 ```
@@ -672,7 +672,7 @@ const ci = await mcBootstrap(data, nBootstrap, statistic, confidence, seed);
 Compute steady-state distribution of discrete Markov chain.
 
 ```js
-import { computeSteadyState } from 'miniml';
+import { computeSteadyState } from '@seanchatmangpt/wminml';
 
 const steadyState = await computeSteadyState(transitionMatrix, nStates);
 ```
@@ -700,7 +700,7 @@ import {
   hmmViterbi,
   hmmBackward,
   hmmTrainBaumWelch
-} from 'miniml';
+} from '@seanchatmangpt/wminml';
 
 // Forward algorithm (likelihood)
 const alpha = await hmmForward(initial, transition, emission, obs, nStates, nObs);
@@ -728,7 +728,7 @@ const model = await hmmTrainBaumWelch(obs, nStates, nObsSymbols, maxIterations, 
 Bayesian sampling via Markov Chain Monte Carlo.
 
 ```js
-import { metropolisHastings } from 'miniml';
+import { metropolisHastings } from '@seanchatmangpt/wminml';
 
 const samples = await metropolisHastings(logTargetFn, proposalSd, nSamples, burnIn, seed, initial);
 ```
@@ -760,7 +760,7 @@ import {
   normalCdf,
   normalPpf,
   normalSample
-} from 'miniml';
+} from '@seanchatmangpt/wminml';
 
 const pdf = normalPdf(x, mean, std);
 const cdf = normalCdf(x, mean, std);
@@ -779,7 +779,7 @@ import {
   binomialPmf,
   binomialCdf,
   binomialSample
-} from 'miniml';
+} from '@seanchatmangpt/wminml';
 ```
 
 ---
@@ -793,7 +793,7 @@ import {
   poissonPmf,
   poissonCdf,
   poissonSample
-} from 'miniml';
+} from '@seanchatmangpt/wminml';
 ```
 
 ---
@@ -807,7 +807,7 @@ import {
   exponentialPdf,
   exponentialCdf,
   exponentialSample
-} from 'miniml';
+} from '@seanchatmangpt/wminml';
 ```
 
 ---
@@ -824,7 +824,7 @@ import {
   tTestTwoSample,
   tTestPaired,
   welchTTest
-} from 'miniml';
+} from '@seanchatmangpt/wminml';
 
 const t = await tTestOneSample(data, nullHypothesis, alpha);
 const t = await tTestTwoSample(data1, data2, alpha);
@@ -847,7 +847,7 @@ Mann-Whitney U and Wilcoxon signed-rank tests.
 import {
   mannWhitneyU,
   wilcoxonSignedRank
-} from 'miniml';
+} from '@seanchatmangpt/wminml';
 
 const u = await mannWhitneyU(data1, data2);
 const w = await wilcoxonSignedRank(data1, data2);
@@ -868,7 +868,7 @@ Goodness of fit and independence tests.
 import {
   chiSquareTest,
   chiSquareIndependence
-} from 'miniml';
+} from '@seanchatmangpt/wminml';
 
 const chi2 = await chiSquareTest(observed, expected);
 const chi2 = await chiSquareIndependence(contingencyTable);
@@ -886,7 +886,7 @@ const chi2 = await chiSquareIndependence(contingencyTable);
 One-way analysis of variance.
 
 ```js
-import { oneWayAnova } from 'miniml';
+import { oneWayAnova } from '@seanchatmangpt/wminml';
 
 const f = await oneWayAnova(groups, groupSizes);
 ```
@@ -905,7 +905,7 @@ const f = await oneWayAnova(groups, groupSizes);
 Radial basis function kernel for similarity computation.
 
 ```js
-import { rbfKernel, rbfKernelMatrix } from 'miniml';
+import { rbfKernel, rbfKernelMatrix } from '@seanchatmangpt/wminml';
 
 const k = await rbfKernel(x, y, gamma);
 const K = await rbfKernelMatrix(data, nSamples, nFeatures, gamma);
@@ -926,7 +926,7 @@ const K = await rbfKernelMatrix(data, nSamples, nFeatures, gamma);
 Polynomial kernel matrix.
 
 ```js
-import { polynomialKernel, polynomialKernelMatrix } from 'miniml';
+import { polynomialKernel, polynomialKernelMatrix } from '@seanchatmangpt/wminml';
 
 const k = await polynomialKernel(x, y, degree, coef0);
 const K = await polynomialKernelMatrix(data, nSamples, nFeatures, degree, gamma, coef0);
@@ -944,7 +944,7 @@ const K = await polynomialKernelMatrix(data, nSamples, nFeatures, degree, gamma,
 Hyperbolic tangent kernel.
 
 ```js
-import { sigmoidKernel, sigmoidKernelMatrix } from 'miniml';
+import { sigmoidKernel, sigmoidKernelMatrix } from '@seanchatmangpt/wminml';
 
 const k = await sigmoidKernel(x, y, gamma, coef0);
 const K = await sigmoidKernelMatrix(data, nSamples, nFeatures, gamma, coef0);
@@ -963,7 +963,7 @@ const K = await sigmoidKernelMatrix(data, nSamples, nFeatures, gamma, coef0);
 MCMC-based parameter estimation.
 
 ```js
-import { bayesianEstimate } from 'miniml';
+import { bayesianEstimate } from '@seanchatmangpt/wminml';
 
 const samples = await bayesianEstimate(logLikelihood, logPrior, nSamples, burnIn, seed, initial, proposalSd);
 ```
@@ -980,7 +980,7 @@ const samples = await bayesianEstimate(logLikelihood, logPrior, nSamples, burnIn
 Conjugate prior linear regression.
 
 ```js
-import { bayesianLinearRegression } from 'miniml';
+import { bayesianLinearRegression } from '@seanchatmangpt/wminml';
 
 const model = await bayesianLinearRegression(data, nFeatures, targets, priorPrecision, priorAlpha, priorBeta);
 ```
@@ -999,7 +999,7 @@ const model = await bayesianLinearRegression(data, nFeatures, targets, priorPrec
 Cholesky-based Gaussian process regression.
 
 ```js
-import { gpFit } from 'miniml';
+import { gpFit } from '@seanchatmangpt/wminml';
 
 const model = await gpFit(data, nFeatures, targets, kernelType, kernelParams, noise);
 ```
@@ -1021,7 +1021,7 @@ const model = await gpFit(data, nFeatures, targets, kernelType, kernelParams, no
 Prediction with uncertainty intervals.
 
 ```js
-import { gpPredict } from 'miniml';
+import { gpPredict } from '@seanchatmangpt/wminml';
 
 const pred = await gpPredict(model, xTest, nFeatures);
 // { mean: [...], std: [...], lower: [...], upper: [...] }
@@ -1036,7 +1036,7 @@ const pred = await gpPredict(model, xTest, nFeatures);
 Survival curve estimation with confidence intervals.
 
 ```js
-import { kaplanMeier } from 'miniml';
+import { kaplanMeier } from '@seanchatmangpt/wminml';
 
 const km = await kaplanMeier(times, events);
 ```
@@ -1057,7 +1057,7 @@ const km = await kaplanMeier(times, events);
 Hazard ratio modeling via partial likelihood.
 
 ```js
-import { coxProportionalHazards } from 'miniml';
+import { coxProportionalHazards } from '@seanchatmangpt/wminml';
 
 const cox = await coxProportionalHazards(features, nFeatures, times, events, maxIterations, learningRate);
 ```
@@ -1076,7 +1076,7 @@ const cox = await coxProportionalHazards(features, nFeatures, times, events, max
 Frequent itemset mining and association rule discovery.
 
 ```js
-import { apriori } from 'miniml';
+import { apriori } from '@seanchatmangpt/wminml';
 
 const rules = await apriori(transactions, transactionLengths, minSupport, minConfidence);
 ```
@@ -1101,7 +1101,7 @@ const rules = await apriori(transactions, transactionLengths, minSupport, minCon
 Collaborative filtering via SGD.
 
 ```js
-import { matrixFactorization } from 'miniml';
+import { matrixFactorization } from '@seanchatmangpt/wminml';
 
 const model = await matrixFactorization(ratings, nUsers, nItems, nFactors, maxIterations, learningRate, regularization, seed);
 ```
@@ -1118,7 +1118,7 @@ const model = await matrixFactorization(ratings, nUsers, nItems, nFactors, maxIt
 k-NN based collaborative filtering.
 
 ```js
-import { userUserCollaborative } from 'miniml';
+import { userUserCollaborative } from '@seanchatmangpt/wminml';
 
 const predictions = await userUserCollaborative(ratings, nUsers, nItems, userId, k);
 ```
@@ -1137,7 +1137,7 @@ const predictions = await userUserCollaborative(ratings, nUsers, nItems, userId,
 Link analysis ranking algorithm.
 
 ```js
-import { pagerank } from 'miniml';
+import { pagerank } from '@seanchatmangpt/wminml';
 
 const ranks = await pagerank(adjacency, nNodes, damping, maxIterations, tol);
 ```
@@ -1154,7 +1154,7 @@ const ranks = await pagerank(adjacency, nNodes, damping, maxIterations, tol);
 Dijkstra's algorithm for shortest paths.
 
 ```js
-import { shortestPath } from 'miniml';
+import { shortestPath } from '@seanchatmangpt/wminml';
 
 const distances = await shortestPath(adjacency, nNodes, source);
 ```
@@ -1171,7 +1171,7 @@ const distances = await shortestPath(adjacency, nNodes, source);
 Label propagation for community discovery.
 
 ```js
-import { communityDetection } from 'miniml';
+import { communityDetection } from '@seanchatmangpt/wminml';
 
 const labels = await communityDetection(adjacency, nNodes);
 ```

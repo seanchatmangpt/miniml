@@ -15,7 +15,7 @@ Chain `autoFit` calls with different configurations to build a tailored pipeline
 Run feature selection first, then search algorithms on the reduced feature set.
 
 ```typescript
-import { autoFit } from 'miniml';
+import { autoFit } from '@seanchatmangpt/wminml';
 
 const X = [
   [0.8, 0.3, 0.9, 0.1, 0.7, 0.4],

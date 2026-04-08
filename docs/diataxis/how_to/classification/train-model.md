@@ -18,7 +18,7 @@ import {
   standardScaler,
   accuracy,
   confusionMatrix,
-} from "miniml";
+} from "@seanchatmangpt/wminml";
 
 // Flat arrays: 4 features x 100 samples
 const X = new Float64Array([
@@ -55,7 +55,7 @@ import {
   randomForestClassify,
   naiveBayesTrain,
   logisticRegression,
-} from "miniml";
+} from "@seanchatmangpt/wminml";
 
 // KNN -- good baseline, non-parametric
 const knnModel = knnTrain(XTrainS, yTrain, nSamples * 0.8, nFeatures, 5);

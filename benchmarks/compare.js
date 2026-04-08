@@ -4,7 +4,7 @@
  * Run with: node --experimental-wasm-modules compare.js
  */
 
-import { linearRegression as wasmLinear, sma as wasmSma } from 'miniml';
+import { linearRegression as wasmLinear, sma as wasmSma } from '@seanchatmangpt/wminml';
 import ss from 'simple-statistics';
 
 // Generate test data

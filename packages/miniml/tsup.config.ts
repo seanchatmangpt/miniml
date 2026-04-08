@@ -8,5 +8,5 @@ export default defineConfig({
   clean: true,
   minify: true,
   treeshake: true,
-  external: ['./wasm/miniml_core.js'],
+  external: ['./wasm/wminml.js'],
 });

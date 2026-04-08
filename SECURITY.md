@@ -31,9 +31,9 @@ Include the following in your report:
 ## Scope
 
 This security policy covers:
-- The `miniml` npm package
-- The `miniml-core` Rust crate
-- The WASM binary (`miniml_core_bg.wasm`)
+- The `@seanchatmangpt/wminml` npm package
+- The `wminml` Rust crate
+- The WASM binary (`wminml_bg.wasm`)
 
 ## Known Limitations
 

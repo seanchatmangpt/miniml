@@ -13,7 +13,7 @@ Use the silhouette score to evaluate cluster quality across different values of 
 ### Step 1: Try a range of k values
 
 ```typescript
-import { kmeans, silhouetteScore, standardScaler } from "miniml";
+import { kmeans, silhouetteScore, standardScaler } from "@seanchatmangpt/wminml";
 
 const nSamples = X.length / nFeatures;
 
@@ -80,7 +80,7 @@ for (const [cluster, count] of clusterCounts) {
 K-Means++ chooses initial centroids more intelligently than random initialization, leading to more stable results.
 
 ```typescript
-import { kmeansPlusPlus } from "miniml";
+import { kmeansPlusPlus } from "@seanchatmangpt/wminml";
 
 const { labels: labelsPP } = kmeansPlusPlus(
   scaled,

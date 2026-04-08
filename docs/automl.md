@@ -29,7 +29,7 @@ AutoML saves time and often discovers better models than manual tuning because:
 ## Quick Start
 
 ```js
-import { autoFit } from 'miniml';
+import { autoFit } from '@seanchatmangpt/wminml';
 
 // Basic usage
 const model = await autoFit(X, y);
@@ -123,7 +123,7 @@ const model = await autoFit(X, y, {
 ### GA Feature Selection Example
 
 ```js
-import { geneticFeatureSelection } from 'miniml';
+import { geneticFeatureSelection } from '@seanchatmangpt/wminml';
 
 const result = await geneticFeatureSelection(X, y, {
   populationSize: 50,
@@ -177,7 +177,7 @@ const X_selected = X.map(row =>
 ### PSO Optimization Example
 
 ```js
-import { psoOptimize } from 'miniml';
+import { psoOptimize } from '@seanchatmangpt/wminml';
 
 const result = await psoOptimize({
   // Objective function to minimize
@@ -248,7 +248,7 @@ AutoML can select from the following algorithms:
 ### Algorithm Selection Example
 
 ```js
-import { autoFit } from 'miniml';
+import { autoFit } from '@seanchatmangpt/wminml';
 
 const model = await autoFit(X, y, {
   algorithms: [
@@ -456,7 +456,7 @@ const model = await autoFit(X, y, {
 // 1. Check for missing values
 // 2. Check for class imbalance
 // 3. Try feature scaling
-import { standardScaler } from 'miniml';
+import { standardScaler } from '@seanchatmangpt/wminml';
 const X_scaled = await standardScaler(X, nSamples, nFeatures);
 
 const model = await autoFit(X_scaled, y);

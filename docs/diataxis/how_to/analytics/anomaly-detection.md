@@ -15,7 +15,7 @@ miniml provides two complementary approaches: statistical outlier detection (z-s
 Best for **univariate data** with an approximately normal distribution. Uses z-scores to flag points that are far from the mean.
 
 ```typescript
-import { statisticalOutlier } from 'miniml';
+import { statisticalOutlier } from '@seanchatmangpt/wminml';
 
 // Transaction amounts (most are normal, a few are suspicious)
 const amounts = [
@@ -46,7 +46,7 @@ The `threshold` parameter sets the z-score cutoff. Common values:
 Best for **multivariate data** where anomalies depend on combinations of features, not individual values.
 
 ```typescript
-import { isolationForestTrain } from 'miniml';
+import { isolationForestTrain } from '@seanchatmangpt/wminml';
 
 // Customer behavior features: [loginFrequency, purchaseAmount, sessionDuration, pageViews]
 const X = new Float64Array([
@@ -77,7 +77,7 @@ const model = isolationForestTrain(X, nSamples, nFeatures, 100, 10);
 For robust detection, run both methods and take the intersection:
 
 ```typescript
-import { statisticalOutlier, isolationForestTrain } from 'miniml';
+import { statisticalOutlier, isolationForestTrain } from '@seanchatmangpt/wminml';
 
 // 1. Statistical check on a key feature (e.g., transaction amount)
 const amounts = [...];  // your data

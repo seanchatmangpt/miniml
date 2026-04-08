@@ -4,7 +4,7 @@
  * Run with: node --experimental-wasm-modules benchmark.js
  */
 
-import { linearRegression, polynomialRegression, sma, ema } from 'miniml';
+import { linearRegression, polynomialRegression, sma, ema } from '@seanchatmangpt/wminml';
 
 // Generate test data
 function generateData(n) {

@@ -13,7 +13,7 @@ Most classifiers in miniml support multi-class classification directly. No one-v
 ### Step 1: Verify your labels
 
 ```typescript
-import { labelEncoder } from "miniml";
+import { labelEncoder } from "@seanchatmangpt/wminml";
 
 // String labels need encoding to numeric values
 const labels = [
@@ -39,7 +39,7 @@ import {
   accuracy,
   confusionMatrix,
   standardScaler,
-} from "miniml";
+} from "@seanchatmangpt/wminml";
 
 const nSamples = X.length / nFeatures;
 const { XTrain, XTest, yTrain, yTest } = dataSplit(X, y, 0.2);

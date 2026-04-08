@@ -42,7 +42,7 @@ import {
   minmaxScaler,
   robustScaler,
   normalizer,
-} from "miniml";
+} from "@seanchatmangpt/wminml";
 
 const nSamples = X.length / nFeatures;
 
@@ -68,7 +68,7 @@ const XNorm = normalizer(X, nSamples, nFeatures);
 Never fit a scaler on test data. Fit on training data, then transform test data.
 
 ```typescript
-import { standardScaler, dataSplit } from "miniml";
+import { standardScaler, dataSplit } from "@seanchatmangpt/wminml";
 
 const { XTrain, XTest, yTrain, yTest } = dataSplit(X, y, 0.2);
 const trainN = XTrain.length / nFeatures;

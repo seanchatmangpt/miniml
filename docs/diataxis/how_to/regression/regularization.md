@@ -22,7 +22,7 @@ import {
   rmse,
   standardScaler,
   dataSplit,
-} from "miniml";
+} from "@seanchatmangpt/wminml";
 
 const nSamples = X.length / nFeatures;
 const { XTrain, XTest, yTrain, yTest } = dataSplit(X, y, 0.2);

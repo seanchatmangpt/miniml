@@ -12,7 +12,7 @@ Train a classifier in 5 minutes with miniml. No Python, no servers, no setup bey
 ## Prerequisites
 
 ```bash
-npm install miniml
+npm install @seanchatmangpt/wminml
 ```
 
 That's it. miniml runs entirely in your browser or Node.js -- no external dependencies.
@@ -24,7 +24,7 @@ miniml works with flat `Float64Array` in row-major order. Each row is one sample
 Let's create a synthetic dataset: two overlapping clusters of points in 2D space.
 
 ```typescript
-import { init, knnTrain, decisionTreeTrain, accuracy, confusionMatrix, dataSplit } from 'miniml';
+import { init, knnTrain, decisionTreeTrain, accuracy, confusionMatrix, dataSplit } from '@seanchatmangpt/wminml';
 
 await init();
 

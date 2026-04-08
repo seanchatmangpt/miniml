@@ -18,7 +18,7 @@ Imagine a dataset of customers with two features: annual spending and visit freq
 import {
   init, kmeans, kmeansPlusPlus, dbscan,
   silhouetteScore, standardScaler,
-} from 'miniml';
+} from '@seanchatmangpt/wminml';
 
 await init();
 

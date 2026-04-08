@@ -11,7 +11,7 @@ Estimate unknown parameters from data using Bayesian inference with MCMC samplin
 ## Prerequisites
 
 ```typescript
-import { init, bayesianEstimate } from 'miniml';
+import { init, bayesianEstimate } from '@seanchatmangpt/wminml';
 await init();
 ```
 

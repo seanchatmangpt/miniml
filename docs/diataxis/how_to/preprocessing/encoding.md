@@ -28,7 +28,7 @@ const passed = ["yes", "no", "yes", "yes", "no", "yes"];
 Assigns a unique integer to each category. Simple but can introduce false ordinal relationships.
 
 ```typescript
-import { labelEncoder } from "miniml";
+import { labelEncoder } from "@seanchatmangpt/wminml";
 
 const { encoded, classes } = labelEncoder(colors);
 console.log(`Classes: ${JSON.stringify(Array.from(classes))}`);
@@ -47,7 +47,7 @@ console.log(`Decoded: ${JSON.stringify(decoded)}`);
 Creates a binary column for each category. No false ordinal relationship.
 
 ```typescript
-import { labelEncoder, oneHotEncoder } from "miniml";
+import { labelEncoder, oneHotEncoder } from "@seanchatmangpt/wminml";
 
 // First, label-encode to get numeric indices
 const { encoded, classes } = labelEncoder(colors);
@@ -76,7 +76,7 @@ for (let i = 0; i < encoded.length; i++) {
 Maps categories to integers preserving a specific order.
 
 ```typescript
-import { ordinalEncoder } from "miniml";
+import { ordinalEncoder } from "@seanchatmangpt/wminml";
 
 const categories = ["small", "medium", "large"];
 const { encoded, mapping } = ordinalEncoder(sizes, categories);

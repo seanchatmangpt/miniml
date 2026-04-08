@@ -11,7 +11,7 @@ Find the shortest distances from a source node to all other nodes using Dijkstra
 ## Prerequisites
 
 ```typescript
-import { init, shortestPath } from 'miniml';
+import { init, shortestPath } from '@seanchatmangpt/wminml';
 await init();
 ```
 

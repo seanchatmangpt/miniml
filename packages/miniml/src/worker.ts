@@ -3,7 +3,7 @@
  *
  * @example
  * ```ts
- * import { createWorker } from 'miniml/worker';
+ * import { createWorker } from '@seanchatmangpt/wminml/worker';
  *
  * const ml = await createWorker();
  * const model = await ml.linearRegression(hugeX, hugeY);
@@ -44,7 +44,7 @@ let wasm = null;
 
 async function init() {
   if (wasm) return;
-  const mod = await import('./wasm/miniml_core.js');
+  const mod = await import('./wasm/wminml.js');
   await mod.default();
   wasm = mod;
 }

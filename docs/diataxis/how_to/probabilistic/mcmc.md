@@ -11,7 +11,7 @@ Estimate posterior distributions using Metropolis-Hastings Markov Chain Monte Ca
 ## Prerequisites
 
 ```typescript
-import { init, metropolisHastings, bayesianEstimate } from 'miniml';
+import { init, metropolisHastings, bayesianEstimate } from '@seanchatmangpt/wminml';
 await init();
 ```
 

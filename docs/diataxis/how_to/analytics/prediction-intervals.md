@@ -15,7 +15,7 @@ miniml provides two approaches to prediction intervals: bootstrap (model-agnosti
 Bootstrap works with any model. Resample your data with replacement, retrain, and collect the distribution of predictions.
 
 ```typescript
-import { mcBootstrap } from 'miniml';
+import { mcBootstrap } from '@seanchatmangpt/wminml';
 
 // Example: predict mean house price from a small sample
 const housePrices = [320, 350, 280, 410, 390, 310, 360, 340, 300, 370];
@@ -36,7 +36,7 @@ console.log(`  Bootstrap samples: ${result.nBootstrap}`);
 For model predictions, bootstrap the residuals:
 
 ```typescript
-import { mcBootstrap } from 'miniml';
+import { mcBootstrap } from '@seanchatmangpt/wminml';
 
 // Simulated model predictions vs actuals
 const residuals = [
@@ -64,7 +64,7 @@ console.log(`  95% CI: [${(pointPrediction - ciWidth).toFixed(1)}, ${(pointPredi
 GP models provide prediction intervals directly -- this is their primary advantage over other regression methods.
 
 ```typescript
-import { gpFit, gpPredict } from 'miniml';
+import { gpFit, gpPredict } from '@seanchatmangpt/wminml';
 
 // Training data
 const nTrain = 15;

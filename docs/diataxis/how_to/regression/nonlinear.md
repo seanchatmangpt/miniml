@@ -15,7 +15,7 @@ Use polynomial regression for general curves, exponential regression for growth/
 Fit a linear model first. If R-squared is low and residuals show a pattern, the relationship is non-linear.
 
 ```typescript
-import { linearRegression, r2Score } from "miniml";
+import { linearRegression, r2Score } from "@seanchatmangpt/wminml";
 
 const lin = linearRegression(X, y);
 const r2 = r2Score(y, lin.predict(X));
@@ -32,7 +32,7 @@ if (r2 < 0.7) {
 Polynomial regression fits a curve of any degree. Higher degree captures more complex shapes.
 
 ```typescript
-import { polynomialRegression, r2Score, dataSplit } from "miniml";
+import { polynomialRegression, r2Score, dataSplit } from "@seanchatmangpt/wminml";
 
 const { XTrain, XTest, yTrain, yTest } = dataSplit(X, y, 0.2);
 
@@ -55,7 +55,7 @@ for (const degree of [2, 3, 4, 5]) {
 For data that grows or decays proportionally -- population growth, radioactive decay, compound interest.
 
 ```typescript
-import { exponentialRegression, r2Score } from "miniml";
+import { exponentialRegression, r2Score } from "@seanchatmangpt/wminml";
 
 const exp = exponentialRegression(X, y);
 const expR2 = r2Score(y, exp.predict(X));
@@ -71,7 +71,7 @@ console.log(`Model: y = ${exp.a.toFixed(4)} * e^(${exp.b.toFixed(4)} * x)`);
 For scaling relationships -- "if x doubles, y quadruples." Common in physics, economics, biology.
 
 ```typescript
-import { powerRegression, r2Score } from "miniml";
+import { powerRegression, r2Score } from "@seanchatmangpt/wminml";
 
 const pow = powerRegression(X, y);
 const powR2 = r2Score(y, pow.predict(X));
@@ -83,7 +83,7 @@ console.log(`Model: y = ${pow.a.toFixed(4)} * x^${pow.b.toFixed(4)}`);
 ### Step 5: Pick the right model
 
 ```typescript
-import { polynomialRegression, exponentialRegression, powerRegression, r2Score } from "miniml";
+import { polynomialRegression, exponentialRegression, powerRegression, r2Score } from "@seanchatmangpt/wminml";
 
 const models = [
   { name: "Polynomial (3)", preds: polynomialRegression(X, y, 3).predict(X) },

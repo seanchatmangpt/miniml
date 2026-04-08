@@ -13,7 +13,7 @@ Start with linear regression as a baseline. If the relationship is non-linear, t
 ### Step 1: Prepare the data
 
 ```typescript
-import { dataSplit, r2Score, mse, rmse, mae, standardScaler } from "miniml";
+import { dataSplit, r2Score, mse, rmse, mae, standardScaler } from "@seanchatmangpt/wminml";
 
 // X: feature matrix (flat Float64Array), y: target values
 const nSamples = X.length / nFeatures;
@@ -34,7 +34,7 @@ import {
   exponentialRegression,
   powerRegression,
   svr,
-} from "miniml";
+} from "@seanchatmangpt/wminml";
 
 // Linear Regression -- baseline for linear relationships
 const lin = linearRegression(XTrain, yTrain);

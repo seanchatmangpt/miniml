@@ -10,7 +10,7 @@ Common issues and solutions when using miniml.
 
 **Solution:**
 ```typescript
-import { init, knnTrain } from 'miniml';
+import { init, knnTrain } from '@seanchatmangpt/wminml';
 
 // Always call init() first and await it
 await init();
@@ -85,7 +85,7 @@ const model = logisticTrain(X, y, nSamples, nFeatures, nClasses, {
 
 3. **Scale your features:**
 ```typescript
-import { standardScalerFit, standardScalerTransform } from 'miniml';
+import { standardScalerFit, standardScalerTransform } from '@seanchatmangpt/wminml';
 
 const scaler = standardScalerFit(X, nSamples, nFeatures);
 const Xscaled = standardScalerTransform(scaler, X, nSamples, nFeatures);
@@ -126,7 +126,7 @@ const Xscaled = standardScalerTransform(scaler, X, nSamples, nFeatures);
 3. **Increase WASM memory** (if your bundler supports it):
 ```typescript
 // Some bundlers allow configuring initial/maximum WASM memory
-import init, { memory } from 'miniml';
+import init, { memory } from '@seanchatmangpt/wminml';
 ```
 
 ---

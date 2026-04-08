@@ -14,7 +14,7 @@ In this tutorial you will learn how to use Gaussian Process (GP) regression in m
 import {
   gpFit,
   gpPredict,
-} from 'miniml';
+} from '@seanchatmangpt/wminml';
 ```
 
 ---

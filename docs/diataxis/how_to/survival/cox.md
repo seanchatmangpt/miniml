@@ -11,7 +11,7 @@ Model the effect of covariates on survival using Cox proportional hazards regres
 ## Prerequisites
 
 ```typescript
-import { init, coxProportionalHazards } from 'miniml';
+import { init, coxProportionalHazards } from '@seanchatmangpt/wminml';
 await init();
 ```
 

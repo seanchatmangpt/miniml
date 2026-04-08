@@ -15,7 +15,7 @@ miniml provides three drift detection methods, each suited to different data typ
 Best for **sequence data** where you can compare the set of unique items in sliding windows.
 
 ```typescript
-import { jaccardDriftWindow } from 'miniml';
+import { jaccardDriftWindow } from '@seanchatmangpt/wminml';
 
 // User click sequences over time (each inner array is a session)
 const sequences = [
@@ -42,7 +42,7 @@ The Jaccard index measures similarity between consecutive windows. A value near 
 Best for **numeric data** where you compare a reference distribution against recent data.
 
 ```typescript
-import { statisticalDrift } from 'miniml';
+import { statisticalDrift } from '@seanchatmangpt/wminml';
 
 // Reference distribution: feature values from training time
 const reference = [2.1, 2.3, 2.0, 2.5, 2.2, 2.4, 2.1, 2.3, 2.0, 2.6];
@@ -64,7 +64,7 @@ A low p-value (below your threshold) means the distributions are significantly d
 Best for **time series data** where you want to detect a shift in the running mean.
 
 ```typescript
-import { pageHinkley } from 'miniml';
+import { pageHinkley } from '@seanchatmangpt/wminml';
 
 // Sensor readings over time (simulated drift at index 40)
 const readings = [];

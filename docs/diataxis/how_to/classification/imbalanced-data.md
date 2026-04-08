@@ -13,7 +13,7 @@ Diagnose the imbalance with a confusion matrix, then use appropriate techniques 
 ### Step 1: Diagnose the problem
 
 ```typescript
-import { accuracy, confusionMatrix, naiveBayesTrain } from "miniml";
+import { accuracy, confusionMatrix, naiveBayesTrain } from "@seanchatmangpt/wminml";
 
 // Train a model on imbalanced data (90% class 0, 10% class 1)
 const model = naiveBayesTrain(X, y, nSamples, nFeatures);
@@ -81,7 +81,7 @@ function balanceByOversampling(
 ### Step 3: Train on the balanced data
 
 ```typescript
-import { decisionTreeTrain, randomForestClassify, knnTrain } from "miniml";
+import { decisionTreeTrain, randomForestClassify, knnTrain } from "@seanchatmangpt/wminml";
 
 const { X: XBal, y: yBal, nSamples: nBal } = balanceByOversampling(
   XTrain,

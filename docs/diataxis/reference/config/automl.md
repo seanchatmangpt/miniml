@@ -72,7 +72,7 @@ The algorithm with the highest CV score is selected for the final pipeline.
 ## Usage Example
 
 ```typescript
-import { init, automlFit, automlPredict } from 'miniml';
+import { init, automlFit, automlPredict } from '@seanchatmangpt/wminml';
 await init();
 
 // AutoML automatically selects features and tunes hyperparameters

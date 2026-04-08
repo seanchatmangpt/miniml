@@ -11,7 +11,7 @@ Make predictions with uncertainty estimates using a fitted Gaussian Process mode
 ## Prerequisites
 
 ```typescript
-import { init, gpFit } from 'miniml';
+import { init, gpFit } from '@seanchatmangpt/wminml';
 await init();
 ```
 

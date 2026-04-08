@@ -19,7 +19,7 @@ Real-world usage examples for miniml.
 ### Problem: Automatically Find the Best Classifier
 
 ```js
-import { autoFit } from 'miniml';
+import { autoFit } from '@seanchatmangpt/wminml';
 
 // Sample data: iris-like classification
 const X = new Float64Array([
@@ -65,7 +65,7 @@ import {
   randomForestClassify,
   classificationReport,
   confusionMatrix
-} from 'miniml';
+} from '@seanchatmangpt/wminml';
 
 // Sample customer data
 // Features: [age, tenure, monthly_charges, total_charges]
@@ -129,7 +129,7 @@ import {
   r2Score,
   rmse,
   standardScaler
-} from 'miniml';
+} from '@seanchatmangpt/wminml';
 
 // Sample house data
 // Features: [sqft, bedrooms, bathrooms, age, garage_size, lot_size, rooms, floors]
@@ -226,7 +226,7 @@ import {
   standardScaler,
   silhouetteScore,
   dbscan
-} from 'miniml';
+} from '@seanchatmangpt/wminml';
 
 // Sample customer data
 // Features: [annual_income, spending_score, age, purchase_frequency]
@@ -311,7 +311,7 @@ import {
   peakDetection,
   linearRegression,
   exponentialRegression
-} from 'miniml';
+} from '@seanchatmangpt/wminml';
 
 // Monthly sales data (12 months)
 const sales = new Float64Array([
@@ -372,7 +372,7 @@ import {
   zScoreOutliers,
   iqrOutliers,
   standardScaler
-} from 'miniml';
+} from '@seanchatmangpt/wminml';
 
 // Transaction data
 // Features: [amount, frequency, merchant_category, time_of_day, day_of_week]
@@ -530,7 +530,7 @@ import {
   r2Score,
   mae,
   autoFit
-} from 'miniml';
+} from '@seanchatmangpt/wminml';
 
 // Customer data
 // Features: [age, tenure, monthly_spend, total_spend, frequency, avg_order_value, days_since_last_purchase, complaints, support_calls, n_products]
@@ -673,7 +673,7 @@ predictCLV().then(result => {
 ### 1. Always Scale Features
 
 ```js
-import { standardScaler } from 'miniml';
+import { standardScaler } from '@seanchatmangpt/wminml';
 
 const X_scaled = await standardScaler(X, nSamples, nFeatures);
 // Most algorithms perform better with scaled data
@@ -682,7 +682,7 @@ const X_scaled = await standardScaler(X, nSamples, nFeatures);
 ### 2. Use Cross-Validation
 
 ```js
-import { crossValScore } from 'miniml';
+import { crossValScore } from '@seanchatmangpt/wminml';
 
 const scores = await crossValScore(model, X, y, 5);
 console.log('CV scores:', scores);

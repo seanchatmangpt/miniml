@@ -11,7 +11,7 @@ Rank nodes in a graph by their importance using the PageRank algorithm.
 ## Prerequisites
 
 ```typescript
-import { init, pageRank } from 'miniml';
+import { init, pageRank } from '@seanchatmangpt/wminml';
 await init();
 ```
 

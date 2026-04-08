@@ -11,7 +11,7 @@ Compute polynomial kernel values for mapping data into higher-dimensional featur
 ## Prerequisites
 
 ```typescript
-import { init, polynomialKernel, polynomialKernelMatrix } from 'miniml';
+import { init, polynomialKernel, polynomialKernelMatrix } from '@seanchatmangpt/wminml';
 await init();
 ```
 

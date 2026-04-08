@@ -11,7 +11,7 @@ Discover groups of densely connected nodes using label propagation.
 ## Prerequisites
 
 ```typescript
-import { init, communityDetection } from 'miniml';
+import { init, communityDetection } from '@seanchatmangpt/wminml';
 await init();
 ```
 

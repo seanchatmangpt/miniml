@@ -11,7 +11,7 @@ Test hypotheses without assuming normality: Mann-Whitney U and Wilcoxon signed-r
 ## Prerequisites
 
 ```typescript
-import { init, mannWhitneyU, wilcoxonSignedRank, ksTest } from 'miniml';
+import { init, mannWhitneyU, wilcoxonSignedRank, ksTest } from '@seanchatmangpt/wminml';
 await init();
 ```
 

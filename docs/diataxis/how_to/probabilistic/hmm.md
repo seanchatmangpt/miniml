@@ -12,7 +12,7 @@ Work with sequences where the underlying states are hidden and only observations
 ## Prerequisites
 
 ```typescript
-import { init, HMM } from 'miniml';
+import { init, HMM } from '@seanchatmangpt/wminml';
 await init();
 ```
 

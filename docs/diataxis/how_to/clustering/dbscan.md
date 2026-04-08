@@ -15,7 +15,7 @@ DBSCAN (Density-Based Spatial Clustering of Applications with Noise) groups poin
 `epsilon` defines the neighborhood radius. `minPoints` is the minimum number of points within that radius to form a dense region.
 
 ```typescript
-import { standardScaler, dbscan, silhouetteScore } from "miniml";
+import { standardScaler, dbscan, silhouetteScore } from "@seanchatmangpt/wminml";
 
 const nSamples = X.length / nFeatures;
 const { scaled } = standardScaler(X, nSamples, nFeatures);
@@ -67,7 +67,7 @@ for (const [cluster, count] of clusterCounts) {
 ### Step 3: Compare with K-Means
 
 ```typescript
-import { kmeans } from "miniml";
+import { kmeans } from "@seanchatmangpt/wminml";
 
 // Run K-Means with k matching DBSCAN cluster count
 const { labels: kmLabels } = kmeans(scaled, nSamples, nFeatures, nClusters, 100);

@@ -12,7 +12,7 @@ Compare group means with hypothesis tests: one-sample, two-sample, paired, and W
 ## Prerequisites
 
 ```typescript
-import { init, tTestOneSample, tTestTwoSample, tTestPaired, welchTTest } from 'miniml';
+import { init, tTestOneSample, tTestTwoSample, tTestPaired, welchTTest } from '@seanchatmangpt/wminml';
 await init();
 ```
 

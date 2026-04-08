@@ -10,7 +10,7 @@ Test relationships between categorical variables: goodness-of-fit and independen
 ## Prerequisites
 
 ```typescript
-import { init, chiSquareTest, chiSquareIndependence } from 'miniml';
+import { init, chiSquareTest, chiSquareIndependence } from '@seanchatmangpt/wminml';
 await init();
 ```
 

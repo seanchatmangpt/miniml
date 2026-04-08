@@ -11,7 +11,7 @@ You have a dataset with many features, but only some of them contribute to predi
 Enable `featureSelection` in `autoFit` to run a GA-based search over feature subsets.
 
 ```typescript
-import { autoFit } from 'miniml';
+import { autoFit } from '@seanchatmangpt/wminml';
 
 // Dataset: 5 features, but only features 0, 2, and 4 are predictive
 const X = [

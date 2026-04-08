@@ -20,7 +20,7 @@
     "dist"
   ],
   "scripts": {
-    "build": "tsup && cp wasm/miniml_core_bg.wasm dist/",
+    "build": "tsup && cp wasm/wminml_bg.wasm dist/",
     "build:wasm": "cd ../../crates/miniml-core && wasm-pack build --target web --out-dir ../../packages/miniml/wasm",
     "test": "vitest run",
     "test:watch": "vitest",

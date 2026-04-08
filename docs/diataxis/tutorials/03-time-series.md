@@ -15,7 +15,7 @@ Forecast sales data with moving averages, exponential smoothing, and trend detec
 Real sales data has three components: a trend (growing over time), seasonality (repeating patterns), and noise. Let's build that.
 
 ```typescript
-import { init, sma, ema, exponentialSmoothing, trendForecast } from 'miniml';
+import { init, sma, ema, exponentialSmoothing, trendForecast } from '@seanchatmangpt/wminml';
 
 await init();
 

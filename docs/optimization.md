@@ -34,7 +34,7 @@ Genetic algorithms are optimization algorithms inspired by natural selection. Th
 ### Feature Selection with GA
 
 ```js
-import { geneticFeatureSelection } from 'miniml';
+import { geneticFeatureSelection } from '@seanchatmangpt/wminml';
 
 const result = await geneticFeatureSelection(X, y, {
   populationSize: 50,
@@ -84,7 +84,7 @@ console.log('Original score:', result.originalScore);
 ### Custom GA
 
 ```js
-import { GeneticAlgorithm } from 'miniml';
+import { GeneticAlgorithm } from '@seanchatmangpt/wminml';
 
 const ga = new GeneticAlgorithm({
   chromosomeLength: 20,
@@ -124,7 +124,7 @@ PSO is a computational method that optimizes a problem by iteratively trying to 
 ### Hyperparameter Optimization with PSO
 
 ```js
-import { psoOptimize } from 'miniml';
+import { psoOptimize } from '@seanchatmangpt/wminml';
 
 const result = await psoOptimize({
   objectiveFn: async (params) => {
@@ -196,7 +196,7 @@ Simulated annealing is a probabilistic technique for approximating the global op
 ### Optimization Example
 
 ```js
-import { simulatedAnnealing } from 'miniml';
+import { simulatedAnnealing } from '@seanchatmangpt/wminml';
 
 const result = await simulatedAnnealing({
   objectiveFn: async (state) => {
@@ -267,7 +267,7 @@ Multi-armed bandit algorithms balance exploration (trying new options) and explo
 ### Epsilon-Greedy
 
 ```js
-import { epsilonGreedy } from 'miniml';
+import { epsilonGreedy } from '@seanchatmangpt/wminml';
 
 const bandit = epsilonGreedy({
   nArms: 5,
@@ -289,7 +289,7 @@ console.log('Arm values:', bandit.getArmValues());
 ### UCB (Upper Confidence Bound)
 
 ```js
-import { ucb } from 'miniml';
+import { ucb } from '@seanchatmangpt/wminml';
 
 const bandit = ucb({
   nArms: 5,
@@ -306,7 +306,7 @@ for (let t = 0; t < 1000; t++) {
 ### Thompson Sampling
 
 ```js
-import { thompsonSampling } from 'miniml';
+import { thompsonSampling } from '@seanchatmangpt/wminml';
 
 const bandit = thompsonSampling({
   nArms: 5,
@@ -340,7 +340,7 @@ Feature importance methods identify which features contribute most to model pred
 ### Permutation Importance
 
 ```js
-import { permutationImportance } from 'miniml';
+import { permutationImportance } from '@seanchatmangpt/wminml';
 
 const importance = await permutationImportance({
   model: trainedModel,
@@ -357,7 +357,7 @@ console.log('Std deviation:', importance.stds);
 ### Gini Importance
 
 ```js
-import { giniImportance } from 'miniml';
+import { giniImportance } from '@seanchatmangpt/wminml';
 
 const importance = await giniImportance(decisionTreeModel);
 console.log('Feature importance:', importance);
@@ -366,7 +366,7 @@ console.log('Feature importance:', importance);
 ### SHAP-like Values
 
 ```js
-import { shapValues } from 'miniml';
+import { shapValues } from '@seanchatmangpt/wminml';
 
 const shap = await shapValues({
   model: trainedModel,
@@ -389,7 +389,7 @@ Anomaly detection identifies data points that deviate significantly from the maj
 ### Isolation Forest
 
 ```js
-import { isolationForest } from 'miniml';
+import { isolationForest } from '@seanchatmangpt/wminml';
 
 const model = await isolationForest(X, {
   nTrees: 100,
@@ -404,7 +404,7 @@ const scores = await model.scoreSamples(X);
 ### Statistical Outlier Detection
 
 ```js
-import { zScoreOutliers } from 'miniml';
+import { zScoreOutliers } from '@seanchatmangpt/wminml';
 
 const outliers = await zScoreOutliers(data, {
   threshold: 3,
@@ -415,7 +415,7 @@ const outliers = await zScoreOutliers(data, {
 ### IQR Method
 
 ```js
-import { iqrOutliers } from 'miniml';
+import { iqrOutliers } from '@seanchatmangpt/wminml';
 
 const outliers = await iqrOutliers(data, {
   multiplier: 1.5  // Q3 + 1.5×IQR
@@ -433,7 +433,7 @@ Drift detection monitors changes in data distribution over time.
 ### ADWIN (Adaptive Windowing)
 
 ```js
-import { adwinDetector } from 'miniml';
+import { adwinDetector } from '@seanchatmangpt/wminml';
 
 const detector = adwinDetector({
   delta: 0.002,
@@ -452,7 +452,7 @@ for (const value of dataStream) {
 ### DDM (Drift Detection Method)
 
 ```js
-import { ddmDetector } from 'miniml';
+import { ddmDetector } from '@seanchatmangpt/wminml';
 
 const detector = ddmDetector({
   warningLevel: 2.0,
@@ -474,7 +474,7 @@ for (const prediction of predictions) {
 ### Page-Hinkley Test
 
 ```js
-import { pageHinkleyDetector } from 'miniml';
+import { pageHinkleyDetector } from '@seanchatmangpt/wminml';
 
 const detector = pageHinkleyDetector({
   alpha: 0.99,
@@ -501,7 +501,7 @@ Prediction intervals quantify uncertainty in predictions.
 ### Bootstrap Intervals
 
 ```js
-import { bootstrapIntervals } from 'miniml';
+import { bootstrapIntervals } from '@seanchatmangpt/wminml';
 
 const intervals = await bootstrapIntervals({
   model: trainedModel,
@@ -517,7 +517,7 @@ console.log('Upper bounds:', intervals.upper);
 ### Conformal Prediction
 
 ```js
-import { conformalIntervals } from 'miniml';
+import { conformalIntervals } from '@seanchatmangpt/wminml';
 
 const intervals = await conformalIntervals({
   model: trainedModel,
@@ -534,7 +534,7 @@ console.log('Coverage:', intervals.coverage);
 ### Quantile Regression
 
 ```js
-import { quantileRegression } from 'miniml';
+import { quantileRegression } from '@seanchatmangpt/wminml';
 
 const model = await quantileRegression(X, y, {
   quantiles: [0.05, 0.5, 0.95],
@@ -646,7 +646,7 @@ const refined = await gradientDescent({
 ### Multi-Objective Optimization
 
 ```js
-import { nsga2 } from 'miniml';
+import { nsga2 } from '@seanchatmangpt/wminml';
 
 const paretoFront = await nsga2({
   objectives: [

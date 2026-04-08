@@ -69,7 +69,7 @@ All miniml functions return `MlError` on failure (wrapped as `JsValue` in WASM).
 ## Handling Errors in JavaScript
 
 ```typescript
-import { init, tTestOneSample } from 'miniml';
+import { init, tTestOneSample } from '@seanchatmangpt/wminml';
 await init();
 
 try {

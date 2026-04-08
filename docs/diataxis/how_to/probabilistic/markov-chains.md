@@ -12,7 +12,7 @@ Model systems that transition between discrete states with known probabilities.
 ## Prerequisites
 
 ```typescript
-import { init, MarkovChain } from 'miniml';
+import { init, MarkovChain } from '@seanchatmangpt/wminml';
 await init();
 ```
 

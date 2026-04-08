@@ -35,7 +35,7 @@ import type {
 } from './types.js';
 
 // WASM module instance (lazily loaded)
-let wasmModule: typeof import('../wasm/miniml_core.js') | null = null;
+let wasmModule: typeof import('../wasm/wminml.js') | null = null;
 let initPromise: Promise<void> | null = null;
 
 /**
@@ -48,7 +48,7 @@ export async function init(): Promise<void> {
 
   if (!initPromise) {
     initPromise = (async () => {
-      const mod = await import('../wasm/miniml_core.js');
+      const mod = await import('../wasm/wminml.js');
 
       // Check if we're in Node.js
       const isNode = typeof globalThis.process !== 'undefined' &&
@@ -65,8 +65,8 @@ export async function init(): Promise<void> {
           const __dirname = dirname(__filename);
           const { existsSync } = await import('fs');
           // Try dist/ (npm package) then wasm/ (dev)
-          const distPath = join(__dirname, 'miniml_core_bg.wasm');
-          const devPath = join(__dirname, '..', 'wasm', 'miniml_core_bg.wasm');
+          const distPath = join(__dirname, 'wminml_bg.wasm');
+          const devPath = join(__dirname, '..', 'wasm', 'wminml_bg.wasm');
           const wasmPath = existsSync(distPath) ? distPath : devPath;
 
           mod.initSync({ module: readFileSync(wasmPath) });
@@ -88,7 +88,7 @@ export async function init(): Promise<void> {
 /**
  * Ensure WASM is loaded before use
  */
-async function ensureInit(): Promise<typeof import('../wasm/miniml_core.js')> {
+async function ensureInit(): Promise<typeof import('../wasm/wminml.js')> {
   await init();
   return wasmModule!;
 }

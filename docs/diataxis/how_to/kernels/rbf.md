@@ -11,7 +11,7 @@ Compute the Radial Basis Function (Gaussian) kernel between data points.
 ## Prerequisites
 
 ```typescript
-import { init, rbfKernel, rbfKernelMatrix } from 'miniml';
+import { init, rbfKernel, rbfKernelMatrix } from '@seanchatmangpt/wminml';
 await init();
 ```
 

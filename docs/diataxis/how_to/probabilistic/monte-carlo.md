@@ -11,7 +11,7 @@ Estimate integrals, expected values, and confidence intervals through random sam
 ## Prerequisites
 
 ```typescript
-import { init, mcEstimatePi, mcBootstrap, mcExpectedValue } from 'miniml';
+import { init, mcEstimatePi, mcBootstrap, mcExpectedValue } from '@seanchatmangpt/wminml';
 await init();
 ```
 

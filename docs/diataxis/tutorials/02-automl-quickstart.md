@@ -14,7 +14,7 @@ You provide data. AutoML returns the best model it found, plus an explanation of
 ## Basic Usage
 
 ```typescript
-import { init, autoFit } from 'miniml';
+import { init, autoFit } from '@seanchatmangpt/wminml';
 
 await init();
 

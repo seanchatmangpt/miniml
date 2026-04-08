@@ -11,7 +11,7 @@ Test whether the means of three or more groups differ significantly.
 ## Prerequisites
 
 ```typescript
-import { init, oneWayAnova } from 'miniml';
+import { init, oneWayAnova } from '@seanchatmangpt/wminml';
 await init();
 ```
 

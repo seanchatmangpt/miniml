@@ -16,7 +16,7 @@ import {
   markovSteadyState,
   simulateChain,
   metropolisHastings,
-} from 'miniml';
+} from '@seanchatmangpt/wminml';
 ```
 
 ---

@@ -11,7 +11,7 @@ Fit a nonparametric regression model that provides uncertainty estimates for eve
 ## Prerequisites
 
 ```typescript
-import { init, gpFit } from 'miniml';
+import { init, gpFit } from '@seanchatmangpt/wminml';
 await init();
 ```
 

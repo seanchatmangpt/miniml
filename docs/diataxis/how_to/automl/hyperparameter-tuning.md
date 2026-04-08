@@ -13,7 +13,7 @@ Model performance depends heavily on hyperparameters (learning rate, regularizat
 ### Basic Usage
 
 ```typescript
-import { autoFit } from 'miniml';
+import { autoFit } from '@seanchatmangpt/wminml';
 
 const X = [
   [1.2, 3.4], [2.1, 5.6], [3.3, 2.1], [4.5, 7.8],

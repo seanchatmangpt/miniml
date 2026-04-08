@@ -11,7 +11,7 @@ Compute the sigmoid (hyperbolic tangent) kernel, inspired by neural network acti
 ## Prerequisites
 
 ```typescript
-import { init, sigmoidKernel, sigmoidKernelMatrix } from 'miniml';
+import { init, sigmoidKernel, sigmoidKernelMatrix } from '@seanchatmangpt/wminml';
 await init();
 ```
 

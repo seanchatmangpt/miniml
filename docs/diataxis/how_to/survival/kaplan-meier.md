@@ -11,7 +11,7 @@ Estimate survival probabilities over time from time-to-event data.
 ## Prerequisites
 
 ```typescript
-import { init, kaplanMeier } from 'miniml';
+import { init, kaplanMeier } from '@seanchatmangpt/wminml';
 await init();
 ```
 

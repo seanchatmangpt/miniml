@@ -13,7 +13,7 @@ Use hierarchical agglomerative clustering. It starts with each point as its own 
 ### Step 1: Try different linkage methods
 
 ```typescript
-import { hierarchicalClustering, standardScaler, silhouetteScore } from "miniml";
+import { hierarchicalClustering, standardScaler, silhouetteScore } from "@seanchatmangpt/wminml";
 
 const nSamples = X.length / nFeatures;
 const { scaled } = standardScaler(X, nSamples, nFeatures);
@@ -71,7 +71,7 @@ console.log(`Best: linkage=${bestLinkage}, k=${bestK}, silhouette=${bestScore.to
 ### Step 3: Compare with K-Means and DBSCAN
 
 ```typescript
-import { kmeans, dbscan } from "miniml";
+import { kmeans, dbscan } from "@seanchatmangpt/wminml";
 
 // K-Means with same k
 const { labels: kmLabels } = kmeans(scaled, nSamples, nFeatures, bestK, 100);

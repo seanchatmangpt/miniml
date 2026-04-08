@@ -11,7 +11,7 @@ Fit a linear regression with uncertainty estimates using conjugate priors.
 ## Prerequisites
 
 ```typescript
-import { init, bayesianLinearRegression } from 'miniml';
+import { init, bayesianLinearRegression } from '@seanchatmangpt/wminml';
 await init();
 ```
 
