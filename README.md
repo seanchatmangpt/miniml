@@ -18,7 +18,7 @@
 
 Most apps just need simple predictions: forecast next month's sales, add a trendline to a chart, smooth noisy sensor data. You don't need a 500KB neural network library for that.
 
-micro-ml is **~56KB gzipped** — 8 ML algorithms + regression + smoothing + forecasting. All in WASM. Sub-millisecond on typical datasets.
+micro-ml is **~60KB gzipped** — 62 ML algorithms including survival analysis, drift detection, sequence prediction, regression, clustering, and classification. All in WASM. Sub-millisecond on typical datasets.
 
 ```
 npm install micro-ml
@@ -117,6 +117,65 @@ result.getExplainedVarianceRatio(); // [0.85, 0.10] (95% variance kept)
 result.getTransformed();            // [[x,y], [x,y], ...]
 ```
 
+### Predict Survival/Reliability
+Model time-to-events with Weibull analysis.
+
+```js
+import { weibullFit } from 'micro-ml';
+
+// Time-to-failure data (e.g., equipment lifetimes)
+const failureTimes = [100, 150, 200, 250, 300, 350, 400, 450];
+
+// Fit Weibull model
+const model = await weibullFit(failureTimes, 8);
+console.log(model.shape);           // >1 = increasing hazard (aging)
+console.log(model.scale);           // Characteristic lifetime
+
+// Probability equipment survives past 500 time units
+console.log(model.survivalProbability(500)); // 0.23 (23% survive)
+
+// Hazard rate at time 300 (failure risk per unit time)
+console.log(model.hazardRate(300));        // 0.008
+```
+
+### Monitor Data Drift
+Detect when data distributions change over time.
+
+```js
+import { ewmaDriftDetection, jaccardDriftDetection } from 'micro-ml';
+
+// Continuous monitoring with EWMA
+const sensorReadings = [100, 101, 99, 100, 102, 105, 120, 130, ...];
+const driftIndices = await ewmaDriftDetection(sensorReadings, n, 0.3, 100, 5, 10);
+// → [6, 7, ...] (drift detected at these indices)
+
+// Categorical data with Jaccard similarity
+const categories = [/* one-hot encoded stream */];
+const drifts = await jaccardDriftDetection(categories, nFeatures, n, 50, 0.7);
+```
+
+### Predict Next in Sequence
+Predict the next item in a sequence using n-grams.
+
+```js
+import { ngramFit } from 'micro-ml';
+
+// Training sequences (process traces, text, etc.)
+const sequences = [1, 2, 3, 1, 2, 4, 1, 2, 3, 1, 2, 5];
+const lengths = [4, 4, 4];
+
+// Fit bigram model (n=2)
+const model = await ngramFit(sequences, lengths, 2);
+
+// Predict next items after context [1, 2]
+const predictions = await model.predict([1, 2], 3);
+// → [3, 0.50, 4, 0.25, 5, 0.25] (item 3 with 50% probability)
+
+// Smoothed probability for unseen context
+const prob = await ngramProbabilitySmooth(sequences, lengths, 2, [1, 2], 99);
+// → 0.03 (non-zero due to Laplace smoothing)
+```
+
 ---
 
 ## When to Use Which Function?
@@ -137,6 +196,9 @@ result.getTransformed();            // [[x,y], [x,y], ...]
 | Decision rules | `decisionTree` | Loan approval, feature importance |
 | Reduce dimensions | `pca` | Visualisation, feature extraction |
 | Seasonal patterns | `detectSeasonality` | Monthly sales cycles, weekly patterns |
+| Time-to-event analysis | `weibullFit` | Equipment reliability, customer churn |
+| Monitor for drift | `ewmaDriftDetection` | Data quality, model monitoring |
+| Predict sequences | `ngramFit` | Process mining, next activity prediction |
 
 ---
 
