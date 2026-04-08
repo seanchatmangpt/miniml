@@ -18,7 +18,7 @@
 
 Most apps just need simple predictions: forecast next month's sales, add a trendline to a chart, smooth noisy sensor data. You don't need a 500KB neural network library for that.
 
-micro-ml is **~60KB gzipped** — 62 ML algorithms including survival analysis, drift detection, sequence prediction, regression, clustering, and classification. All in WASM. Sub-millisecond on typical datasets.
+micro-ml is **~60KB gzipped** — 68 ML algorithms including survival analysis, drift detection, sequence prediction, feature engineering, ensemble discovery, statistical distributions, statistical tests, anomaly detection, regression, clustering, and classification. All in WASM. Sub-millisecond on typical datasets.
 
 ```
 npm install micro-ml
@@ -176,6 +176,118 @@ const prob = await ngramProbabilitySmooth(sequences, lengths, 2, [1, 2], 99);
 // → 0.03 (non-zero due to Laplace smoothing)
 ```
 
+### Feature Engineering for Sequences
+Extract features from sequences for ML preprocessing.
+
+```js
+import { prefixEncode, reworkScore, activityCounts, traceStatistics } from 'micro-ml';
+
+// Extract prefix features (one-hot encoded)
+const sequences = [1, 2, 3, 1, 2, 4];
+const lengths = [4, 3];
+const features = await prefixEncode(sequences, lengths, 2);
+// → [[0, 1, 0, ...], [0, 0, 1, ...]] (binary feature matrix)
+
+// Compute rework score (activity repetitions)
+const scores = await reworkScore(sequences, lengths);
+// → [0.0, 0.33] (second sequence has 33% repetitions)
+
+// Get activity counts (frequency encoding)
+const counts = await activityCounts(sequences, lengths);
+// → [1, 3, 2, 4, 3, 2, ...] (item, count pairs)
+
+// Trace statistics (length, unique, time)
+const stats = await traceStatistics(sequences, lengths, timestamps);
+// → [4, 3, 150.0, 3, 3, 200.0] (length, unique, elapsed per trace)
+```
+
+### Ensemble Discovery
+Combine multiple models and find best predictions.
+
+```js
+import { ensembleDiscovery, qualityWeightedPrediction } from 'micro-ml';
+
+// Multiple model predictions
+const predictions = [
+  10.0, 20.0, 30.0,  // Model 1
+  12.0, 22.0, 32.0,  // Model 2 (better quality)
+  9.0,  21.0, 29.0,  // Model 3 (worse quality)
+];
+const qualities = [0.8, 0.9, 0.7];
+
+// Weighted prediction (quality-weighted average)
+const weighted = await qualityWeightedPrediction(predictions, 3, 3, qualities);
+// → [10.7, 21.3, 31.0] (Model 2 has highest influence)
+
+// Ensemble discovery with consensus scoring
+const ensemble = await ensembleDiscovery(predictions, 3, 3, qualities);
+ensemble.prune(2);  // Keep top 2 models
+ensemble.getConsensusScores();  // [1.0, 0.0, 1.0] (agreement at positions 0 and 2)
+```
+
+### Statistical Tests
+Test hypotheses about your data.
+
+```js
+import { chiSquareTest, ksTest } from 'micro-ml';
+
+// Chi-square test of independence (categorical data)
+const observed = [10, 20, 30, 40];  // 2x2 contingency table
+const result = await chiSquareTest(observed, 2, 2, 0.05);
+console.log(result.pValue);     // 0.05 (p-value)
+console.log(result.isSignificant);  // false (not significant at α=0.05)
+
+// Kolmogorov-Smirnov test (distribution comparison)
+const sample1 = [1.0, 2.0, 3.0, 4.0, 5.0];
+const sample2 = [2.0, 3.0, 4.0, 5.0, 6.0];  // Shifted by 1
+const ksResult = await ksTest(sample1, 5, sample2, 5, 0.05);
+console.log(ksResult.statistic);  // KS statistic
+console.log(ksResult.isSignificant);  // true (distributions differ)
+```
+
+### Anomaly Detection
+Find outliers and anomalies in your data.
+
+```js
+import { zscoreAnomalyDetection, iqrAnomalyDetection, boundaryCoverage } from 'micro-ml';
+
+// Z-score anomaly detection
+const data = [10.0, 11.0, 10.0, 12.0, 10.0, 25.0];  // 25 is outlier
+const zscoreResult = await zscoreAnomalyDetection(data, 6, 2.0);
+console.log(zscoreResult.getIsAnomaly());  // [0, 0, 0, 0, 0, 1] (only 25 is anomaly)
+console.log(zscoreResult.getAnomalyCount());  // 1
+
+// IQR anomaly detection (robust to extreme values)
+const iqrResult = await iqrAnomalyDetection(data, 6, 1.5);
+console.log(iqrResult.getIsAnomaly());  // [0, 0, 0, 0, 0, 1]
+
+// Boundary coverage (out-of-bounds detection)
+const bounds = [1.0, 2.0, 3.0, 10.0, 5.0];  // 10 is outside [0, 6]
+const boundsResult = await boundaryCoverage(bounds, 5, 0.0, 6.0);
+console.log(boundsResult.getIsAnomaly());  // [0, 0, 0, 1, 0] (10 is out of bounds)
+```
+
+### Statistical Distributions
+Model skewed and positive-valued data.
+
+```js
+import { logNormalFit, gammaFit } from 'micro-ml';
+
+// Log-normal distribution (skewed positive data)
+const survival = [100, 200, 150, 300, 250, 400, 350, 500];
+const logNormal = await logNormalFit(survival, 8);
+console.log(logNormal.mu);  // Mean of log(x)
+console.log(logNormal.sigma);  // Std dev of log(x)
+console.log(logNormal.survivalProbability(200));  // P(T > 200)
+
+// Gamma distribution (shape-rate parameterization)
+const counts = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0];
+const gamma = await gammaFit(counts, 7);
+console.log(gamma.shape);  // Shape parameter k
+console.log(gamma.rate);   // Rate parameter θ
+console.log(gamma.survivalProbability(5.0));  // P(T > 5)
+```
+
 ---
 
 ## When to Use Which Function?
@@ -197,6 +309,13 @@ const prob = await ngramProbabilitySmooth(sequences, lengths, 2, [1, 2], 99);
 | Reduce dimensions | `pca` | Visualisation, feature extraction |
 | Seasonal patterns | `detectSeasonality` | Monthly sales cycles, weekly patterns |
 | Time-to-event analysis | `weibullFit` | Equipment reliability, customer churn |
+| **Sequence features** | **`prefixEncode`, `reworkScore`** | Process mining, trace classification |
+| **Ensemble models** | **`ensembleDiscovery`, `qualityWeightedPrediction`** | Model comparison, robust prediction |
+| **Skewed survival data** | **`logNormalFit`, `gammaFit`** | Reliability engineering, churn modeling |
+| **Categorical independence** | **`chiSquareTest`** | A/B testing, survey analysis |
+| **Distribution comparison** | **`ksTest`** | Goodness-of-fit, data validation |
+| **Outlier detection** | **`zscoreAnomalyDetection`, `iqrAnomalyDetection`** | Quality control, sensor monitoring |
+| **Sequence anomalies** | **`sequenceAnomalyDetection`** | Process deviation, pattern monitoring |
 | Monitor for drift | `ewmaDriftDetection` | Data quality, model monitoring |
 | Predict sequences | `ngramFit` | Process mining, next activity prediction |
 

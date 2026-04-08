@@ -474,3 +474,296 @@ Cumulative sum-based change detection:
 - Ng, A. et al. (2001). On Spectral Clustering.
 - Rousseeuw, P. (1984). Least Median of Squares Regression.
 - Fischler, M. & Bolles, R. (1981). Random Sample Consensus.
+
+---
+
+## Feature Engineering (Phase 2)
+
+### Prefix Features
+
+**Algorithm:** One-hot encoding of sequence prefixes.
+
+Extract all unique prefixes up to max_prefix_len from sequences and encode as binary features. Each position in the output represents whether a specific prefix pattern exists.
+
+| Metric | Value |
+|--------|-------|
+| Time | O(n * L) where L is total sequence length |
+| Space | O(V^P) where V is vocabulary size, P is max prefix length |
+| WASM impact | ~3KB |
+
+**Use cases:** Process mining trace classification, sequence preprocessing, feature extraction from logs
+
+### Rework Score
+
+**Formula:** `rework = repetitions / sequence_length`
+
+Counts consecutive repetitions of activities as a measure of process inefficiency (rework loops).
+
+| Metric | Value |
+|--------|-------|
+| Time | O(n) |
+| Space | O(1) |
+| WASM impact | ~1KB |
+
+**Use cases:** Process optimization, identifying inefficiencies, quality metrics
+
+### Activity Counts
+
+**Algorithm:** Frequency encoding of activities.
+
+Counts occurrences of each activity across all sequences and returns sorted by frequency.
+
+| Metric | Value |
+|--------|-------|
+| Time | O(n) |
+| Space | O(A) where A is number of unique activities |
+| WASM impact | ~2KB |
+
+**Use cases:** Process analysis, activity frequency statistics, bottleneck identification
+
+### Trace Statistics
+
+**Metrics:** Length, unique activities, elapsed time.
+
+Computes basic statistics for each trace/sequence including length, number of unique activities, and time duration.
+
+| Metric | Value |
+|--------|-------|
+| Time | O(n) |
+| Space | O(1) |
+| WASM impact | ~2KB |
+
+**Use cases:** Process characterization, performance analysis, trace profiling
+
+### Inter-Event Times
+
+**Formula:** `avg_time = Σ(t_{i+1} - t_i) / (n-1)`
+
+Computes average time between consecutive events in each sequence.
+
+| Metric | Value |
+|--------|-------|
+| Time | O(n) |
+| Space | O(1) |
+| WASM impact | ~1KB |
+
+**Use cases:** Process timing analysis, bottleneck detection, service level monitoring
+
+---
+
+## Ensemble Discovery (Phase 3)
+
+### Quality-Weighted Prediction
+
+**Formula:** `ŷ = Σ(w_i * ŷ_i) / Σ(w_i)`
+
+Combines predictions from multiple models weighted by their quality scores (e.g., R², accuracy).
+
+| Metric | Value |
+|--------|-------|
+| Time | O(n * m) where m is number of models |
+| Space | O(m) |
+| WASM impact | ~2KB |
+
+**Use cases:** Model ensembling, robust prediction, automated model selection
+
+### Consensus Scoring
+
+**Formula:** `consensus = agreements / total_comparisons`
+
+Measures agreement between multiple prediction vectors as fraction of identical predictions.
+
+| Metric | Value |
+|--------|-------|
+| Time | O(n * m²) |
+| Space | O(1) |
+| WASM impact | ~2KB |
+
+**Use cases:** Model disagreement analysis, ensemble diversity measurement, uncertainty estimation
+
+### Pruned Ensemble
+
+**Algorithm:** Rank by quality and keep top-k members.
+
+1. Sort ensemble members by quality (descending)
+2. Keep only top k members
+3. Renormalize weights to sum to 1
+
+| Metric | Value |
+|--------|-------|
+| Time | O(m log m) |
+| Space | O(m) |
+| WASM impact | ~2KB |
+
+**Use cases:** Model selection, ensemble simplification, computational efficiency
+
+---
+
+## Statistical Distributions (Phase 3)
+
+### Log-Normal Distribution
+
+**Formula:** `f(x) = 1/(xσ√2π) * exp(-0.5 * ((ln(x)-μ)/σ)²)`
+
+Models data where log(x) follows a normal distribution. Useful for skewed positive-valued data.
+
+**Parameters:**
+- **μ (mu):** Mean of log-transformed data
+- **σ (sigma):** Standard deviation of log-transformed data
+
+**Key functions:**
+- PDF: `f(x)` - probability density
+- CDF: `F(x)` - cumulative distribution
+- Survival: `S(x) = 1 - F(x)`
+- Percentile: `x_p = exp(μ + σ * z_p)` where z_p is normal quantile
+
+| Metric | Value |
+|--------|-------|
+| Time | O(n) for fitting |
+| Space | O(1) |
+| WASM impact | ~3KB |
+
+**Use cases:** Survival analysis, income distribution, latency modeling, skewed data
+
+### Gamma Distribution
+
+**Formula:** `f(x) = (θ^k / Γ(k)) * x^(k-1) * exp(-θx)`
+
+Two-parameter gamma distribution with shape k and rate θ (1/scale).
+
+**Parameters (Method of Moments):**
+- **shape:** `mean² / variance`
+- **rate:** `mean / variance`
+
+**Key functions:**
+- PDF: `f(x)` - probability density
+- CDF: Series approximation of regularized lower incomplete gamma
+- Survival: `S(x) = 1 - F(x)`
+
+| Metric | Value |
+|--------|-------|
+| Time | O(n) for fitting |
+| Space | O(1) |
+| WASM impact | ~3KB |
+
+**Use cases:** Reliability engineering, queuing theory, rainfall modeling, insurance claims
+
+---
+
+## Statistical Tests (Phase 3)
+
+### Chi-Square Test of Independence
+
+**Formula:** `χ² = Σ((O_ij - E_ij)² / E_ij)`
+
+Tests whether two categorical variables are independent using contingency table analysis.
+
+**Expected value:** `E_ij = (row_total_i * col_total_j) / grand_total`
+
+**Degrees of freedom:** `(rows - 1) * (cols - 1)`
+
+**P-value:** Wilson-Hilferty approximation to chi-square distribution.
+
+| Metric | Value |
+|--------|-------|
+| Time | O(n * m) for n×m contingency table |
+| Space | O(n * m) |
+| WASM impact | ~3KB |
+
+**Use cases:** A/B testing, categorical feature analysis, survey data analysis
+
+### Kolmogorov-Smirnov Test
+
+**Formula:** `D = max|CDF1(x) - CDF2(x)| * √(n1*n2/(n1+n2))`
+
+Two-sample test for whether samples come from the same continuous distribution.
+
+**Empirical CDF:** `F_n(x) = count(X ≤ x) / n`
+
+**P-value:** Smirnov formula approximation based on KS statistic λ.
+
+| Metric | Value |
+|--------|-------|
+| Time | O(n log n) for sorting |
+| Space | O(n) |
+| WASM impact | ~3KB |
+
+**Use cases:** Distribution comparison, goodness-of-fit testing, data validation
+
+---
+
+## Anomaly Detection (Phase 3)
+
+### Z-Score Anomaly Detection
+
+**Formula:** `z = (x - μ) / σ`
+
+Detects anomalies using Z-score (standard deviations from mean). Anomaly if `|z| > threshold`.
+
+| Metric | Value |
+|--------|-------|
+| Time | O(n) |
+| Space | O(1) |
+| WASM impact | ~2KB |
+
+**Use cases:** Outlier detection in univariate data, quality control, sensor monitoring
+
+### IQR Anomaly Detection
+
+**Formula:** `outlier if x < Q1 - k*IQR or x > Q3 + k*IQR`
+
+Detects outliers using Interquartile Range method (robust to extreme values).
+
+**Bounds:** `lower = Q1 - k*IQR`, `upper = Q3 + k*IQR` where k=1.5 by default.
+
+| Metric | Value |
+|--------|-------|
+| Time | O(n log n) for sorting |
+| Space | O(n) |
+| WASM impact | ~2KB |
+
+**Use cases:** Robust outlier detection, box plot statistics, data cleaning
+
+### Boundary Coverage
+
+**Formula:** `anomaly if x < lower_bound or x > upper_bound`
+
+Checks which values fall outside specified boundaries.
+
+**Score:** Distance from nearest bound for out-of-bounds values.
+
+| Metric | Value |
+|--------|-------|
+| Time | O(n) |
+| Space | O(1) |
+| WASM impact | ~2KB |
+
+**Use cases:** Data quality validation, SLA monitoring, constraint checking
+
+### Sequence Anomaly Detection
+
+**Formula:** `anomaly if P(next|context) < threshold`
+
+Detects sequences that deviate from expected patterns using n-gram models.
+
+**Training:** Build n-gram transition counts from sequences
+**Detection:** Low probability transitions indicate anomalies
+
+| Metric | Value |
+|--------|-------|
+| Time | O(n) training, O(L) detection |
+| Space | O(V^n) where V is vocabulary size |
+| WASM impact | ~4KB |
+
+**Use cases:** Process mining (deviation detection), sequence validation, pattern monitoring
+
+---
+
+## Additional References (Phase 2 & 3)
+
+- van der Aalst, W. (2016). Process Mining: Data Science in Action.
+- Johnson, N. (1949). Systems of Frequency Curves Generated by Methods of Random Translation.
+- Pearson, K. (1900). On the Criterion that a Given System of Deviations from the Probable in the Case of a Correlated System of Variables is Such that it Can be Reasonably Supposed to Have Arisen from Random Sampling.
+- Smirnov, N. (1948). Table for Estimating the Goodness of Fit of Empirical Distributions.
+- Wilson, E. & Hilferty, M. (1931). The Distribution of Chi-Square.
+- Beasley, J. & Springer, M. (1977). Algorithm AS 111: The Percentage Points of the Normal Distribution.
