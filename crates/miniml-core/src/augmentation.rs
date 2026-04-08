@@ -243,7 +243,7 @@ pub fn random_oversample(
     Ok(result)
 }
 
-/// Noise injection for regularization
+/// Noise injection for regularization (pure Rust, no WASM dependency)
 ///
 /// # Arguments
 /// * `X` - Feature matrix (n_samples × n_features)
@@ -251,13 +251,14 @@ pub fn random_oversample(
 /// * `distribution` - Type of noise ("gaussian", "uniform")
 /// * `n_samples` - Number of samples
 /// * `n_features` - Number of features
-#[wasm_bindgen]
-pub fn inject_noise(
+/// * `rng` - Random number generator function
+pub fn inject_noise_impl<F: Fn() -> f64>(
     X: &[f64],
     noise_level: f64,
     distribution: &str,
     n_samples: usize,
     n_features: usize,
+    rng: &F,
 ) -> Vec<f64> {
     let mut noisy_X = Vec::with_capacity(X.len());
 
@@ -267,13 +268,13 @@ pub fn inject_noise(
             let noise = match distribution {
                 "gaussian" => {
                     // Box-Muller transform for normal distribution
-                    let u1 = js_sys::Math::random();
-                    let u2 = js_sys::Math::random();
+                    let u1 = rng();
+                    let u2 = rng();
                     let z = (-2.0 * u1.ln()).sqrt() * (2.0 * std::f64::consts::PI * u2).cos();
                     noise_level * z
                 }
                 "uniform" => {
-                    let u = js_sys::Math::random();
+                    let u = rng();
                     noise_level * (u - 0.5) * 2.0
                 }
                 _ => 0.0,
@@ -284,6 +285,17 @@ pub fn inject_noise(
     }
 
     noisy_X
+}
+
+#[wasm_bindgen]
+pub fn inject_noise(
+    X: &[f64],
+    noise_level: f64,
+    distribution: &str,
+    n_samples: usize,
+    n_features: usize,
+) -> Vec<f64> {
+    inject_noise_impl(X, noise_level, distribution, n_samples, n_features, &|| js_sys::Math::random())
 }
 
 /// Mixup augmentation
@@ -475,8 +487,8 @@ mod tests {
 
         assert_eq!(result.length(), 2); // X and y arrays
 
-        let x_array = result.get(0).unwrap();
-        let y_array = result.get(1).unwrap();
+        let x_array = result.get(0);
+        let y_array = result.get(1);
 
         assert!(x_array.is_array());
         assert!(y_array.is_array());
@@ -491,8 +503,8 @@ mod tests {
 
         assert_eq!(result.length(), 2);
 
-        let x_array = result.get(0).unwrap();
-        let y_array = result.get(1).unwrap();
+        let x_array = result.get(0);
+        let y_array = result.get(1);
 
         assert!(x_array.is_array());
         assert!(y_array.is_array());
@@ -538,8 +550,8 @@ mod tests {
 
         assert_eq!(result.length(), 2);
 
-        let x_array = result.get(0).unwrap();
-        let y_array = result.get(1).unwrap();
+        let x_array = result.get(0);
+        let y_array = result.get(1);
 
         assert!(x_array.is_array());
         assert!(y_array.is_array());

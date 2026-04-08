@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>micro-ml Demo</title>
+  <title>miniml Demo</title>
   <style>
     * {
       box-sizing: border-box;
@@ -106,7 +106,7 @@
   </style>
 </head>
 <body>
-  <h1>micro-ml</h1>
+  <h1>miniml</h1>
   <p class="subtitle">Tiny, blazing-fast WASM-powered regression</p>
 
   <div class="card">
@@ -161,8 +161,8 @@
   </div>
 
   <script type="module">
-    // Import micro-ml
-    import { init, linearRegression, trendForecast, sma } from '../packages/micro-ml/dist/index.js';
+    // Import miniml
+    import { init, linearRegression, trendForecast, sma } from '../packages/miniml/dist/index.js';
 
     // Initialize WASM
     await init();

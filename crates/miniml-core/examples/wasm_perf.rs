@@ -1,8 +1,10 @@
 //! WASM Performance Benchmark - Quick Test
 //!
 //! Direct timing of key algorithms to show WASM performance.
+//! Uses _impl functions (pure Rust, no WASM dependency).
 
 use std::time::Instant;
+use miniml_core::*;
 
 fn generate_data(n_samples: usize, n_features: usize) -> Vec<f64> {
     (0..n_samples * n_features)
@@ -21,7 +23,6 @@ fn main() {
     println!("║        WASM Performance Benchmarks                        ║");
     println!("╚════════════════════════════════════════════════════════╝\n");
 
-    // Test representative algorithms from each category
     let mut results = Vec::new();
 
     // Classification - KNN
@@ -29,7 +30,7 @@ fn main() {
         let x = generate_data(1000, 100);
         let y = generate_labels(1000, 3);
         let start = Instant::now();
-        let _model = knn_fit(&x, 100, &y, 5).unwrap();
+        let _model = knn_fit_impl(&x, 100, &y, 5).unwrap();
         let elapsed = start.elapsed().as_micros() as f64 / 1000.0;
         results.push(("KNN (1000×100)", elapsed));
         println!("  ✅ KNN fit (1000×100):            {:.2}ms", elapsed);
@@ -40,7 +41,7 @@ fn main() {
         let x = generate_data(1000, 20);
         let y = generate_labels(1000, 3);
         let start = Instant::now();
-        let _model = decision_tree(&x, 20, &y, 10).unwrap();
+        let _model = decision_tree_impl(&x, 20, &y, 10, 2, true).unwrap();
         let elapsed = start.elapsed().as_micros() as f64 / 1000.0;
         results.push(("Decision Tree (1000×20)", elapsed));
         println!("  ✅ Decision Tree (1000×20):       {:.2}ms", elapsed);
@@ -51,7 +52,7 @@ fn main() {
         let x = generate_data(1000, 50);
         let y = generate_labels(1000, 2);
         let start = Instant::now();
-        let _model = logistic_regression(&x, 1000, 50, &y, 100, 0.01).unwrap();
+        let _model = logistic_regression_impl(&x, 50, &y, 0.01, 100, 0.01).unwrap();
         let elapsed = start.elapsed().as_micros() as f64 / 1000.0;
         results.push(("Logistic Regression (1000×50)", elapsed));
         println!("  ✅ Logistic Regression (1000×50):  {:.2}ms", elapsed);
@@ -62,7 +63,7 @@ fn main() {
         let x = generate_data(1000, 20);
         let y = generate_labels(1000, 3);
         let start = Instant::now();
-        let _model = random_forest(&x, 20, &y, 100, 10, true).unwrap();
+        let _model = random_forest_impl(&x, 20, &y, 100, 10, 2, true).unwrap();
         let elapsed = start.elapsed().as_micros() as f64 / 1000.0;
         results.push(("Random Forest (100×20, 100 trees)", elapsed));
         println!("  ✅ Random Forest (1000×20, 100):   {:.2}ms", elapsed);
@@ -73,7 +74,7 @@ fn main() {
         let x = generate_data(500, 10);
         let y = generate_labels(500, 2);
         let start = Instant::now();
-        let _model = gradient_boosting(&x, 10, &y, 50, 5, 0.1).unwrap();
+        let _model = gradient_boosting_impl(&x, 10, &y, 50, 5, 0.1).unwrap();
         let elapsed = start.elapsed().as_micros() as f64 / 1000.0;
         results.push(("Gradient Boosting (500×10, 50)", elapsed));
         println!("  ✅ Gradient Boosting (500×10, 50):  {:.2}ms", elapsed);
@@ -83,7 +84,7 @@ fn main() {
     {
         let x = generate_data(1000, 20);
         let start = Instant::now();
-        let _model = kmeans(&x, 20, 10, 100).unwrap();
+        let _model = kmeans_impl(&x, 20, 10, 100).unwrap();
         let elapsed = start.elapsed().as_micros() as f64 / 1000.0;
         results.push(("K-Means (1000×20, 10)", elapsed));
         println!("  ✅ K-Means (1000×20, 10):         {:.2}ms", elapsed);
@@ -93,7 +94,7 @@ fn main() {
     {
         let x = generate_data(500, 10);
         let start = Instant::now();
-        let _result = hierarchical(&x, 10, 5);
+        let _result = hierarchical_impl(&x, 10, 5);
         let elapsed = start.elapsed().as_micros() as f64 / 1000.0;
         results.push(("Hierarchical (500×10, 5)", elapsed));
         println!("  ✅ Hierarchical (500×10, 5):        {:.2}ms", elapsed);
@@ -103,7 +104,7 @@ fn main() {
     {
         let x = generate_data(500, 10);
         let start = Instant::now();
-        let _model = dbscan(&x, 10, 0.5, 5);
+        let _model = dbscan_impl(&x, 10, 0.5, 5);
         let elapsed = start.elapsed().as_micros() as f64 / 1000.0;
         results.push(("DBSCAN (500×10)", elapsed));
         println!("  ✅ DBSCAN (500×10):                {:.2}ms", elapsed);
@@ -113,7 +114,8 @@ fn main() {
     {
         let x = generate_data(1000, 100);
         let start = Instant::now();
-        let _result = standard_scaler_fit(&x, 1000, 100);
+        let mut scaler = standard_scaler(100);
+        let _ = scaler.fit_transform(&x).unwrap();
         let elapsed = start.elapsed().as_micros() as f64 / 1000.0;
         results.push(("Standard Scaler (1000×100)", elapsed));
         println!("  ✅ Standard Scaler (1000×100):      {:.2}ms", elapsed);
@@ -123,7 +125,8 @@ fn main() {
     {
         let x = generate_data(1000, 100);
         let start = Instant::now();
-        let _result = min_max_scaler_fit(&x, 1000, 100);
+        let mut scaler = minmax_scaler(100);
+        let _ = scaler.fit_transform(&x).unwrap();
         let elapsed = start.elapsed().as_micros() as f64 / 1000.0;
         results.push(("MinMax Scaler (1000×100)", elapsed));
         println!("  ✅ MinMax Scaler (1000×100):        {:.2}ms", elapsed);
@@ -133,7 +136,7 @@ fn main() {
     {
         let x = generate_data(1000, 50);
         let start = Instant::now();
-        let _model = pca(&x, 1000, 50, 10).unwrap();
+        let _model = pca_impl(&x, 50, 10).unwrap();
         let elapsed = start.elapsed().as_micros() as f64 / 1000.0;
         results.push(("PCA (1000×50 → 10)", elapsed));
         println!("  ✅ PCA (1000×50 → 10):              {:.2}ms", elapsed);
@@ -144,7 +147,7 @@ fn main() {
         let x = generate_data(500, 10);
         let labels = generate_labels(500, 3);
         let start = Instant::now();
-        let _score = silhouette(&x, &labels, 500, 10);
+        let _score = silhouette_score_impl(&x, 10, &labels).unwrap();
         let elapsed = start.elapsed().as_micros() as f64 / 1000.0;
         results.push(("Silhouette Score (500×10)", elapsed));
         println!("  ✅ Silhouette Score (500×10):        {:.2}ms", elapsed);
@@ -155,7 +158,7 @@ fn main() {
         let y_true: Vec<f64> = (0..1000).map(|i| (i % 3) as f64).collect();
         let y_pred: Vec<f64> = (0..1000).map(|i| ((i + 1) % 3) as f64).collect();
         let start = Instant::now();
-        let _result = confusion_matrix(&y_true, &y_pred);
+        let _result = confusion_matrix_impl(&y_true, &y_pred).unwrap();
         let elapsed = start.elapsed().as_micros() as f64 / 1000.0;
         results.push(("Confusion Matrix (1000)", elapsed));
         println!("  ✅ Confusion Matrix (1000):          {:.2}ms", elapsed);
@@ -166,7 +169,7 @@ fn main() {
         let x = generate_data(1000, 50);
         let y: Vec<f64> = (0..1000).map(|i| i as f64 * 2.0 + 1.0).collect();
         let start = Instant::now();
-        let _result = linear_regression(&x, 1000, 50, &y);
+        let _result = ridge_regression_impl(&x, 50, &y, 0.01).unwrap();
         let elapsed = start.elapsed().as_micros() as f64 / 1000.0;
         results.push(("Linear Regression (1000×50)", elapsed));
         println!("  ✅ Linear Regression (1000×50):      {:.2}ms", elapsed);
@@ -176,7 +179,7 @@ fn main() {
     {
         let data: Vec<f64> = (0..500).map(|i| 100.0 + (i as f64) * 0.1).collect();
         let start = Instant::now();
-        let _result = moving_average(&data, 10);
+        let _result = moving_average(&data, 10, MovingAverageType::SMA);
         let elapsed = start.elapsed().as_micros() as f64 / 1000.0;
         results.push(("Moving Average (500)", elapsed));
         println!("  ✅ Moving Average (500):             {:.2}ms", elapsed);
@@ -186,7 +189,7 @@ fn main() {
     {
         let data: Vec<f64> = (0..500).map(|i| 100.0 + (i as f64) * 0.1).collect();
         let start = Instant::now();
-        let _result = exponential_smoothing(&data, 0.5);
+        let _result = exponential_smoothing_impl(&data, 0.5).unwrap();
         let elapsed = start.elapsed().as_micros() as f64 / 1000.0;
         results.push(("Exponential Smoothing (500)", elapsed));
         println!("  ✅ Exponential Smoothing (500):       {:.2}ms", elapsed);

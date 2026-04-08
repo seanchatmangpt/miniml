@@ -1,10 +1,10 @@
 /**
- * Micro-ML Performance Benchmarks
+ * miniml Performance Benchmarks
  *
  * Run with: node --experimental-wasm-modules benchmark.js
  */
 
-import { linearRegression, polynomialRegression, sma, ema } from 'micro-ml';
+import { linearRegression, polynomialRegression, sma, ema } from 'miniml';
 
 // Generate test data
 function generateData(n) {
@@ -93,7 +93,7 @@ function formatResults(results) {
 }
 
 async function main() {
-  console.log('🚀 Micro-ML Performance Benchmarks\n');
+  console.log('🚀 miniml Performance Benchmarks\n');
 
   const results = [];
 

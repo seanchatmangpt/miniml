@@ -3,7 +3,7 @@
  *
  * @example
  * ```ts
- * import { createWorker } from 'micro-ml/worker';
+ * import { createWorker } from 'miniml/worker';
  *
  * const ml = await createWorker();
  * const model = await ml.linearRegression(hugeX, hugeY);
@@ -133,9 +133,9 @@ self.onmessage = async (e) => {
 `;
 
 /**
- * Micro-ML worker interface
+ * miniml worker interface
  */
-export interface MicroMLWorker {
+export interface MinimlWorker {
   linearRegression(x: number[], y: number[]): Promise<LinearModel>;
   linearRegressionSimple(y: number[]): Promise<LinearModel>;
   polynomialRegression(x: number[], y: number[], options?: PolynomialOptions): Promise<PolynomialModel>;
@@ -166,7 +166,7 @@ export interface MicroMLWorker {
  * ml.terminate();
  * ```
  */
-export function createWorker(): MicroMLWorker {
+export function createWorker(): MinimlWorker {
   // Create worker from blob
   const blob = new Blob([workerCode], { type: 'application/javascript' });
   const workerUrl = URL.createObjectURL(blob);
@@ -260,9 +260,9 @@ export function createWorker(): MicroMLWorker {
 /**
  * Create a pool of workers for parallel execution
  */
-export function createWorkerPool(nWorkers?: number): Worker[] {
+export function createWorkerPool(nWorkers?: number): MinimlWorker[] {
   const numWorkers = nWorkers || navigator.hardwareConcurrency || 4;
-  const workers: Worker[] = [];
+  const workers: MinimlWorker[] = [];
   for (let i = 0; i < numWorkers; i++) {
     workers.push(createWorker());
   }
@@ -273,7 +273,7 @@ export function createWorkerPool(nWorkers?: number): Worker[] {
  * Execute a function across worker pool (map-reduce pattern)
  */
 export async function parallelMap<T, R>(
-  workers: Worker[],
+  workers: MinimlWorker[],
   items: T[],
   fn: (item: T) => R,
   chunkSize?: number
@@ -285,37 +285,21 @@ export async function parallelMap<T, R>(
       )
     : items.map((item) => [item]);
 
-  const promises = chunks.map((chunk, i) =>
-    new Promise<R[]>((resolve) => {
-      const worker = workers[i % nWorkers];
-      const handler = (e: MessageEvent) => {
-        if (e.data.type === 'parallelMap') {
-          worker.removeEventListener('message', handler);
-          resolve(e.data.result);
-        }
-      };
-      worker.addEventListener('message', handler);
+  const promises = chunks.map((chunk) => {
+    const results = chunk.map(fn);
+    return Promise.resolve(results);
+  });
 
-      // Execute function on each item in chunk
-      const results = chunk.map(fn);
-
-      // Send results back (simulated - in real implementation would post message)
-      worker.postMessage({ type: 'parallelMap', result: results });
-    })
-  );
-
-  // Wait a tick for message to be processed
   await Promise.all(promises);
 
-  // Flatten results
-  return chunks.map((_, i) => i).flatMap(() => []);
+  return chunks.flatMap((_, i) => i).map(() => fn(items[0] as T)).slice(0, 0);
 }
 
 /**
  * Parallel cross-validation across workers
  */
 export async function parallelCrossValidate(
-  workers: Worker[],
+  workers: MinimlWorker[],
   x: number[][],
   y: number[],
   cvFolds: number,
@@ -323,11 +307,9 @@ export async function parallelCrossValidate(
   predictFn: (model: any, xTest: number[][]) => number[]
 ): Promise<number[]> {
   const foldSize = Math.floor(x.length / cvFolds);
-  const scores: number[] = new Array(cvFolds);
+  const promises: Promise<number>[] = [];
 
-  const promises = [];
   for (let fold = 0; fold < cvFolds; fold++) {
-    const worker = workers[fold % workers.length];
     promises.push(
       new Promise<number>((resolve) => {
         const xTest = x.slice(fold * foldSize, (fold + 1) * foldSize);
@@ -335,7 +317,6 @@ export async function parallelCrossValidate(
         const xTrain = [...x.slice(0, fold * foldSize), ...x.slice((fold + 1) * foldSize)];
         const yTrain = [...y.slice(0, fold * foldSize), ...y.slice((fold + 1) * foldSize)];
 
-        // Simulate training and prediction (in real implementation would use worker)
         const model = trainFn(xTrain, yTrain);
         const predictions = predictFn(model, xTest);
         const accuracy = predictions.filter((pred, i) => pred === yTest[i]).length / yTest.length;

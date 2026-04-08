@@ -2,7 +2,7 @@
 
 **AutoML-powered machine learning in the browser**
 
-miniml combines **30+ ML algorithms** with **genetic algorithm feature selection** and **PSO hyperparameter optimization** — all in **~145KB gzipped** with **SIMD acceleration**.
+miniml combines **70+ ML algorithms** across **15 algorithm families** with **genetic algorithm feature selection** and **PSO hyperparameter optimization** — all in **~145KB gzipped** with **SIMD acceleration**.
 
 ```
 npm install miniml
@@ -15,7 +15,7 @@ npm install miniml
 | Feature | What It Means |
 |---------|---------------|
 | **🤖 AutoML** | GA feature selection + PSO hyperparameter optimization |
-| **📊 30+ Algorithms** | Classification, regression, clustering, preprocessing, metrics |
+| **📊 70+ Algorithms** | Classification, regression, clustering, preprocessing, time series, probabilistic methods, statistical inference, kernels, Bayesian methods, Gaussian processes, survival analysis, association rules, recommendation systems, graph algorithms |
 | **⚡ SIMD Acceleration** | WASM v128 intrinsics for 4-100x speedup |
 | **🔥 Metaheuristics** | Genetic algorithms, PSO, simulated annealing built-in |
 
@@ -31,7 +31,7 @@ const model = await autoFit(X, y);
 const prediction = await model.predict(testPoint);
 
 // Manual algorithm selection
-const knn = await knnTrain(X, y, nSamples, nFeatures, 5);
+const knn = await knnTrain(X, y, nSamples, nFeatures, k);
 const result = await knn.predict(testPoint);
 
 // Ensemble methods
@@ -125,6 +125,7 @@ const hc = await hierarchicalClustering(X, nFeatures, nClusters);
 import {
   linearRegression,
   ridgeRegression,
+  lassoRegression,
   polynomialRegression
 } from 'miniml';
 
@@ -133,6 +134,9 @@ const lr = await linearRegression(X, y, nSamples, nFeatures);
 
 // Ridge Regression
 const rr = await ridgeRegression(X, y, alpha, nSamples, nFeatures);
+
+// Lasso Regression
+const lasso = await lassoRegression(X, y, alpha, l1Ratio, nSamples, nFeatures);
 
 // Polynomial Regression
 const pr = await polynomialRegression(X, y, nSamples, nFeatures, degree);
@@ -163,6 +167,110 @@ const encoded = await labelEncoder(y);
 
 // One-Hot Encoder
 const oneHot = await oneHotEncoder(y, nClasses);
+```
+
+### Probabilistic Methods
+
+```js
+import {
+  mcIntegrate,
+  mcBootstrap,
+  computeSteadyState,
+  hmmForward,
+  metropolisHastings
+} from 'miniml';
+
+// Monte Carlo Integration
+const integral = await mcIntegrate(fn, a, b, n, seed);
+
+// Bootstrap Confidence Intervals
+const ci = await mcBootstrap(data, nBootstrap, 'mean', 0.95, seed);
+
+// Markov Chain Steady State
+const steady = await computeSteadyState(transitionMatrix, nStates);
+
+// Hidden Markov Model
+const alpha = await hmmForward(initial, transition, emission, obs, nStates, nObs);
+```
+
+### Statistical Inference
+
+```js
+import {
+  tTestOneSample,
+  tTestTwoSample,
+  mannWhitneyU,
+  chiSquareTest,
+  oneWayAnova
+} from 'miniml';
+
+// t-Test
+const t = await tTestOneSample(data, nullHypothesis, alpha);
+
+// ANOVA
+const f = await oneWayAnova(groups, groupSizes);
+```
+
+### Kernel Methods
+
+```js
+import {
+  rbfKernelMatrix,
+  polynomialKernelMatrix,
+  sigmoidKernelMatrix
+} from 'miniml';
+
+// RBF Kernel Matrix
+const K = await rbfKernelMatrix(data, nSamples, nFeatures, gamma);
+
+// Polynomial Kernel Matrix
+const K = await polynomialKernelMatrix(data, nSamples, nFeatures, degree, gamma, coef0);
+```
+
+### Bayesian Methods
+
+```js
+import {
+  bayesianEstimate,
+  bayesianLinearRegression
+} from 'miniml';
+
+// Bayesian Estimation (MCMC)
+const posterior = await bayesianEstimate(logLikelihood, logPrior, nSamples, burnIn, seed, initial, proposalSd);
+
+// Bayesian Linear Regression
+const blr = await bayesianLinearRegression(data, nFeatures, targets, priorPrecision, priorAlpha, priorBeta);
+```
+
+### Gaussian Processes
+
+```js
+import {
+  gpFit,
+  gpPredict
+} from 'miniml';
+
+// Fit Gaussian Process
+const model = await gpFit(data, nFeatures, targets, kernelType, kernelParams, noise);
+
+// Predict with Uncertainty
+const pred = await gpPredict(model, xTest, nFeatures);
+// { mean: [...], std: [...], lower: [...], upper: [...] }
+```
+
+### Survival Analysis
+
+```js
+import {
+  kaplanMeier,
+  coxProportionalHazards
+} from 'miniml';
+
+// Kaplan-Meier Survival Curve
+const km = await kaplanMeier(times, events);
+
+// Cox Proportional Hazards
+const cox = await coxProportionalHazards(features, nFeatures, times, events, maxIterations, learningRate);
 ```
 
 ### Metrics
@@ -198,6 +306,11 @@ const score = await silhouetteScore(X, labels, nSamples, nFeatures);
 | K-Means | 1000×20 | 3.2ms | 4x |
 | PCA | 1000×50→10 | 8.5ms | 3x |
 | Standard Scaler | 1000×100 | 0.3ms | 4x |
+| MC Integration | 1M samples | 2.4ms | N/A |
+| HMM Baum-Welch | 100 obs, 5 states | 8.2ms | N/A |
+| ANOVA | 3K×50 | 1.1ms | N/A |
+| GP Fit | 200×10 | 15ms | N/A |
+| PageRank | 1K nodes | 2.1ms | N/A |
 
 ---
 
@@ -213,4 +326,4 @@ const score = await silhouetteScore(X, labels, nSamples, nFeatures);
 
 ## License
 
-MIT © 2026 Sean Chatman
+BSL 1.1 — See [LICENSE](../../LICENSE) for details.

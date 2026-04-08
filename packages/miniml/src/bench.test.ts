@@ -1,5 +1,5 @@
 /**
- * Performance Benchmarks for micro-ml
+ * Performance Benchmarks for miniml
  *
  * Measures execution time for all ML algorithms across various workloads.
  * Target times are based on the optimization plan goals.
@@ -21,6 +21,14 @@ function generateData(nSamples: number, nFeatures: number): number[] {
   return Array.from({ length: nSamples * nFeatures }, () => Math.random());
 }
 
+function toMatrix(flat: number[], nFeatures: number): number[][] {
+  const rows: number[][] = [];
+  for (let i = 0; i < flat.length; i += nFeatures) {
+    rows.push(flat.slice(i, i + nFeatures));
+  }
+  return rows;
+}
+
 function generateLabels(nSamples: number, nClasses: number): number[] {
   return Array.from({ length: nSamples }, () => Math.floor(Math.random() * nClasses));
 }
@@ -36,10 +44,10 @@ describe('Performance Benchmarks', () => {
       const x = generateData(nSamples, nFeatures);
       const y = generateLabels(nSamples, 3);
 
-      await ml.knnTrain(x, y, nSamples, nFeatures, 5);
+      const model = await ml.knnClassifier(toMatrix(x, nFeatures), y, { k: 5 });
 
-      const testPoint = generateData(1, nFeatures);
-      const { elapsed } = benchmark(() => ml.knnPredict(testPoint));
+      const testPoint = toMatrix(generateData(1, nFeatures), nFeatures);
+      const { elapsed } = benchmark(() => model.predict(testPoint));
 
       results['KNN prediction'] = elapsed;
       console.log(`  KNN prediction: ${elapsed.toFixed(2)}ms`);
@@ -53,7 +61,7 @@ describe('Performance Benchmarks', () => {
       const y = generateLabels(nSamples, 2);
 
       const { elapsed } = benchmark(() =>
-        ml.logisticRegression(x, y, nSamples, nFeatures, 1000, 0.01)
+        ml.logisticRegression(toMatrix(x, nFeatures), y, { maxIterations: 1000, learningRate: 0.01 })
       );
 
       results['Logistic Regression training'] = elapsed;
@@ -68,7 +76,7 @@ describe('Performance Benchmarks', () => {
       const y = generateLabels(nSamples, 3);
 
       const { elapsed } = benchmark(() =>
-        ml.decisionTreeClassify(x, y, nFeatures, 10)
+        ml.decisionTree(toMatrix(x, nFeatures), y, { maxDepth: 10 })
       );
 
       results['Decision Tree training'] = elapsed;
@@ -83,7 +91,7 @@ describe('Performance Benchmarks', () => {
       const y = generateLabels(nSamples, 3);
 
       const { elapsed } = benchmark(() =>
-        ml.randomForestClassify(x, y, 100, 10)
+        ml.randomForestClassify(x, y, nFeatures, 100, 10)
       );
 
       results['Random Forest training'] = elapsed;
@@ -98,7 +106,7 @@ describe('Performance Benchmarks', () => {
       const y = generateLabels(nSamples, 2);
 
       const { elapsed } = benchmark(() =>
-        ml.gradientBoostingClassify(x, y, 50, 5, 0.1)
+        ml.gradientBoostingClassify(x, y, nFeatures, 50, 5, 0.1)
       );
 
       results['Gradient Boosting training'] = elapsed;
@@ -113,7 +121,7 @@ describe('Performance Benchmarks', () => {
       const y = generateLabels(nSamples, 3);
 
       const { elapsed } = benchmark(() =>
-        ml.naiveBayesClassify(x, y, nSamples, nFeatures)
+        ml.naiveBayes(toMatrix(x, nFeatures), y)
       );
 
       results['Naive Bayes training'] = elapsed;
@@ -128,7 +136,7 @@ describe('Performance Benchmarks', () => {
       const y = generateLabels(nSamples, 2);
 
       const { elapsed } = benchmark(() =>
-        ml.adaboostClassify(x, y, 50)
+        ml.adaboostClassify(x, y, nFeatures, 50, 0.1)
       );
 
       results['AdaBoost training'] = elapsed;
@@ -143,7 +151,7 @@ describe('Performance Benchmarks', () => {
       const y = generateLabels(nSamples, 2);
 
       const { elapsed } = benchmark(() =>
-        ml.linearSVM(x, y, 0.01, 1000, nSamples, nFeatures)
+        ml.linearSVM(x, y, nFeatures, 0.01, 1000)
       );
 
       results['Linear SVM training'] = elapsed;
@@ -158,7 +166,7 @@ describe('Performance Benchmarks', () => {
       const y = generateLabels(nSamples, 2);
 
       const { elapsed } = benchmark(() =>
-        ml.perceptronTrain(x, y, nSamples, nFeatures, 0.01, 1000)
+        ml.perceptron(toMatrix(x, nFeatures), y, { learningRate: 0.01, maxIterations: 1000 })
       );
 
       results['Perceptron training'] = elapsed;
@@ -168,14 +176,13 @@ describe('Performance Benchmarks', () => {
   });
 
   describe('Regression Algorithms', () => {
-    it('Linear Regression: 1000 samples × 50 features <50ms', async () => {
+    it('Linear Regression: 1000 samples <50ms', async () => {
       const nSamples = 1000;
-      const nFeatures = 50;
-      const x = generateData(nSamples, nFeatures);
-      const y = Array.from({ length: nSamples }, () => Math.random() * 100);
+      const x = Array.from({ length: nSamples }, (_, i) => i);
+      const y = x.map(v => 2.5 * v + 3 + (Math.random() - 0.5) * 10);
 
       const { elapsed } = benchmark(() =>
-        ml.linearRegression(x, y, nSamples, nFeatures)
+        ml.linearRegression(x, y)
       );
 
       results['Linear Regression training'] = elapsed;
@@ -190,7 +197,7 @@ describe('Performance Benchmarks', () => {
       const y = Array.from({ length: nSamples }, () => Math.random() * 100);
 
       const { elapsed } = benchmark(() =>
-        ml.ridgeRegression(x, y, 1.0, nSamples, nFeatures)
+        ml.ridgeRegression(x, y, nFeatures, 1.0)
       );
 
       results['Ridge Regression training'] = elapsed;
@@ -198,14 +205,13 @@ describe('Performance Benchmarks', () => {
       expect(elapsed).toBeLessThan(50);
     });
 
-    it('Polynomial Regression: 500 samples × 5 features, degree 3 <100ms', async () => {
+    it('Polynomial Regression: 500 samples, degree 3 <100ms', async () => {
       const nSamples = 500;
-      const nFeatures = 5;
-      const x = generateData(nSamples, nFeatures);
-      const y = Array.from({ length: nSamples }, () => Math.random() * 100);
+      const x = Array.from({ length: nSamples }, (_, i) => i / 100);
+      const y = x.map(v => 0.5 * v * v + 2 * v + 1 + (Math.random() - 0.5) * 5);
 
       const { elapsed } = benchmark(() =>
-        ml.polynomialRegression(x, y, nSamples, nFeatures, 3)
+        ml.polynomialRegression(x, y, { degree: 3 })
       );
 
       results['Polynomial Regression training'] = elapsed;
@@ -221,7 +227,7 @@ describe('Performance Benchmarks', () => {
       const x = generateData(nSamples, nFeatures);
 
       const { elapsed } = benchmark(() =>
-        ml.kmeans(x, nFeatures, 10, 100, nSamples)
+        ml.kmeans(toMatrix(x, nFeatures), { k: 10, maxIterations: 100 })
       );
 
       results['K-Means clustering'] = elapsed;
@@ -235,7 +241,7 @@ describe('Performance Benchmarks', () => {
       const x = generateData(nSamples, nFeatures);
 
       const { elapsed } = benchmark(() =>
-        ml.kmeansPlus(x, 10, 100, nSamples, nFeatures)
+        ml.kmeansPlus(x, nFeatures, 10, 100)
       );
 
       results['K-Means++ clustering'] = elapsed;
@@ -249,7 +255,7 @@ describe('Performance Benchmarks', () => {
       const x = generateData(nSamples, nFeatures);
 
       const { elapsed } = benchmark(() =>
-        ml.dbscan(x, nFeatures, 0.5, 5)
+        ml.dbscan(toMatrix(x, nFeatures), { eps: 0.5, minPoints: 5 })
       );
 
       results['DBSCAN clustering'] = elapsed;
@@ -279,7 +285,7 @@ describe('Performance Benchmarks', () => {
       const x = generateData(nSamples, nFeatures);
 
       const { elapsed } = benchmark(() =>
-        ml.pca(x, nSamples, nFeatures, 10)
+        ml.pca(toMatrix(x, nFeatures), { nComponents: 10 })
       );
 
       results['PCA'] = elapsed;
@@ -295,7 +301,7 @@ describe('Performance Benchmarks', () => {
       const x = generateData(nSamples, nFeatures);
 
       const { elapsed } = benchmark(() =>
-        ml.standardScaler(x, nSamples, nFeatures)
+        ml.standardScaler(x, nFeatures)
       );
 
       results['Standard Scaler'] = elapsed;
@@ -309,7 +315,7 @@ describe('Performance Benchmarks', () => {
       const x = generateData(nSamples, nFeatures);
 
       const { elapsed } = benchmark(() =>
-        ml.minMaxScaler(x, nSamples, nFeatures)
+        ml.minMaxScaler(x, nFeatures)
       );
 
       results['Min-Max Scaler'] = elapsed;
@@ -332,10 +338,11 @@ describe('Performance Benchmarks', () => {
 
     it('One-Hot Encoder: 500 samples, 5 classes <20ms', async () => {
       const nSamples = 500;
-      const y = Array.from({ length: nSamples }, () => Math.floor(Math.random() * 5));
+      const nFeatures = 5;
+      const y = Array.from({ length: nSamples }, () => Math.floor(Math.random() * nFeatures));
 
       const { elapsed } = benchmark(() =>
-        ml.oneHotEncoder(y, 5)
+        ml.oneHotEncoder(y, nFeatures)
       );
 
       results['One-Hot Encoder'] = elapsed;
@@ -366,7 +373,7 @@ describe('Performance Benchmarks', () => {
       const labels = generateLabels(nSamples, 3);
 
       const { elapsed } = benchmark(() =>
-        ml.silhouetteScore(x, labels, nSamples, nFeatures)
+        ml.silhouetteScore(x, nFeatures, labels)
       );
 
       results['Silhouette Score'] = elapsed;
@@ -383,7 +390,7 @@ describe('Performance Benchmarks', () => {
       const y = generateLabels(nSamples, 3);
 
       const { elapsed } = benchmark(() =>
-        ml.trainTestSplit(x, y, 0.2, nSamples, nFeatures)
+        ml.trainTestSplit(x, y, 0.2, nFeatures)
       );
 
       results['Train-Test Split'] = elapsed;
@@ -397,13 +404,8 @@ describe('Performance Benchmarks', () => {
       const x = generateData(nSamples, nFeatures);
       const y = generateLabels(nSamples, 2);
 
-      // Use a simple model for CV
-      const { result: model } = benchmark(() =>
-        ml.logisticRegression(x, y, nSamples, nFeatures, 100, 0.01)
-      );
-
       const { elapsed } = benchmark(() =>
-        ml.crossValidateScore(x, y, 5, nSamples, nFeatures)
+        ml.crossValidateScore(x, y, 5, 'decision_tree', nFeatures)
       );
 
       results['Cross-Validation (5-fold)'] = elapsed;
@@ -418,7 +420,7 @@ describe('Performance Benchmarks', () => {
       const data = Array.from({ length: nSamples }, () => Math.random() * 100);
 
       const { elapsed } = benchmark(() =>
-        ml.exponentialSmoothing(data, 0.5)
+        ml.exponentialSmoothing(data, { alpha: 0.5 })
       );
 
       results['Exponential Smoothing'] = elapsed;
@@ -431,7 +433,7 @@ describe('Performance Benchmarks', () => {
       const data = Array.from({ length: nSamples }, () => Math.random() * 100);
 
       const { elapsed } = benchmark(() =>
-        ml.movingAverage(data, 10)
+        ml.movingAverage(data, { window: 10 })
       );
 
       results['Moving Average'] = elapsed;
@@ -441,18 +443,14 @@ describe('Performance Benchmarks', () => {
   });
 
   describe('Feature Importance', () => {
-    it('Permutation Importance: 500 samples × 20 features <100ms', async () => {
+    it('Feature Importance Forest: 500 samples × 20 features <100ms', async () => {
       const nSamples = 500;
       const nFeatures = 20;
       const x = generateData(nSamples, nFeatures);
       const y = generateLabels(nSamples, 2);
 
-      const { result: model } = benchmark(() =>
-        ml.randomForestClassify(x, y, 20, 5)
-      );
-
       const { elapsed } = benchmark(() =>
-        ml.featureImportanceForest(model, x, y, nSamples, nFeatures)
+        ml.featureImportanceForest(x, y, nFeatures, 20, 5)
       );
 
       results['Feature Importance (Forest)'] = elapsed;
@@ -462,14 +460,14 @@ describe('Performance Benchmarks', () => {
   });
 
   describe('AutoML', () => {
-    it('AutoFit: 500 samples × 10 features <2s', async () => {
+    it('AutoFit Classification: 500 samples × 10 features <2s', async () => {
       const nSamples = 500;
       const nFeatures = 10;
       const x = generateData(nSamples, nFeatures);
       const y = generateLabels(nSamples, 2);
 
       const { elapsed } = benchmark(() =>
-        ml.autoFit(x, y)
+        ml.autoFitClassification(x, y, nSamples, nFeatures)
       );
 
       results['AutoML (autoFit)'] = elapsed;
@@ -482,9 +480,9 @@ describe('Performance Benchmarks', () => {
 // Print summary after all tests
 describe('Benchmark Summary', () => {
   it('should print all results', () => {
-    console.log('\n╔════════════════════════════════════════════════════════╗');
-    console.log('║         Performance Benchmark Results                   ║');
-    console.log('╚════════════════════════════════════════════════════════╝\n');
+    console.log('\n============================================');
+    console.log('         Performance Benchmark Results');
+    console.log('============================================\n');
 
     const categories = {
       'Classification': [
@@ -533,15 +531,15 @@ describe('Benchmark Summary', () => {
       for (const metric of metrics) {
         if (metric in results) {
           const time = results[metric];
-          const status = time < 100 ? '✅' : time < 500 ? '⚠️' : '❌';
-          console.log(`  ${status} ${metric}: ${time.toFixed(2)}ms`);
+          const status = time < 100 ? 'PASS' : time < 500 ? 'WARN' : 'SLOW';
+          console.log(`  [${status}] ${metric}: ${time.toFixed(2)}ms`);
         }
       }
     }
 
-    console.log('\n✅ = Fast (<100ms)');
-    console.log('⚠️  = Moderate (100-500ms)');
-    console.log('❌ = Slow (>500ms)');
+    console.log('\nPASS = Fast (<100ms)');
+    console.log('WARN = Moderate (100-500ms)');
+    console.log('SLOW = Slow (>500ms)');
     console.log('');
 
     const times = Object.values(results);

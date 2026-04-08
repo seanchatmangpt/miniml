@@ -1051,11 +1051,12 @@ export async function recommendAlgorithm(
 export async function randomForestClassify(
   x: number[],
   y: number[],
+  nFeatures: number,
   nTrees: number,
   maxDepth: number
 ): Promise<any> {
   const wasm = await ensureInit();
-  return wasm.random_forest_classify(new Float64Array(x), new Float64Array(y), nTrees, maxDepth);
+  return wasm.randomForestClassify(new Float64Array(x), nFeatures, new Float64Array(y), nTrees, maxDepth, 2);
 }
 
 /**
@@ -1064,11 +1065,12 @@ export async function randomForestClassify(
 export async function randomForestRegress(
   x: number[],
   y: number[],
+  nFeatures: number,
   nTrees: number,
   maxDepth: number
 ): Promise<any> {
   const wasm = await ensureInit();
-  return wasm.random_forest_regress(new Float64Array(x), new Float64Array(y), nTrees, maxDepth);
+  return wasm.randomForestRegress(new Float64Array(x), nFeatures, new Float64Array(y), nTrees, maxDepth, 2);
 }
 
 /**
@@ -1077,17 +1079,19 @@ export async function randomForestRegress(
 export async function gradientBoostingClassify(
   x: number[],
   y: number[],
-  nEstimators: number,
-  learningRate: number,
-  maxDepth: number
+  nFeatures: number,
+  nTrees: number,
+  maxDepth: number,
+  learningRate: number
 ): Promise<any> {
   const wasm = await ensureInit();
-  return wasm.gradient_boosting_classify(
+  return wasm.gradientBoostingClassify(
     new Float64Array(x),
+    nFeatures,
     new Float64Array(y),
-    nEstimators,
-    learningRate,
-    maxDepth
+    nTrees,
+    maxDepth,
+    learningRate
   );
 }
 
@@ -1097,10 +1101,12 @@ export async function gradientBoostingClassify(
 export async function adaboostClassify(
   x: number[],
   y: number[],
-  nEstimators: number
+  nFeatures: number,
+  nEstimators: number,
+  learningRate: number = 0.1
 ): Promise<any> {
   const wasm = await ensureInit();
-  return wasm.adaboost_classify(new Float64Array(x), new Float64Array(y), nEstimators);
+  return wasm.adaboostClassify(new Float64Array(x), nFeatures, new Float64Array(y), nEstimators, learningRate);
 }
 
 // ============================================================================
@@ -1113,12 +1119,11 @@ export async function adaboostClassify(
 export async function ridgeRegression(
   x: number[],
   y: number[],
-  alpha: number,
-  nSamples: number,
-  nFeatures: number
+  nFeatures: number,
+  alpha: number
 ): Promise<any> {
   const wasm = await ensureInit();
-  return wasm.ridge_regression(new Float64Array(x), new Float64Array(y), alpha, nSamples, nFeatures);
+  return wasm.ridgeRegression(new Float64Array(x), nFeatures, new Float64Array(y), alpha);
 }
 
 /**
@@ -1127,21 +1132,19 @@ export async function ridgeRegression(
 export async function lassoRegression(
   x: number[],
   y: number[],
+  nFeatures: number,
   alpha: number,
-  maxIter: number,
-  tol: number,
-  nSamples: number,
-  nFeatures: number
+  maxIter: number = 1000,
+  tol: number = 1e-4
 ): Promise<any> {
   const wasm = await ensureInit();
-  return wasm.lasso_regression(
+  return wasm.lassoRegression(
     new Float64Array(x),
+    nFeatures,
     new Float64Array(y),
     alpha,
     maxIter,
-    tol,
-    nSamples,
-    nFeatures
+    tol
   );
 }
 
@@ -1151,13 +1154,13 @@ export async function lassoRegression(
 export async function linearSVM(
   x: number[],
   y: number[],
+  nFeatures: number,
   lambda: number,
   maxIter: number,
-  nSamples: number,
-  nFeatures: number
+  learningRate: number = 0.01
 ): Promise<any> {
   const wasm = await ensureInit();
-  return wasm.linear_svm(new Float64Array(x), new Float64Array(y), lambda, maxIter, nSamples, nFeatures);
+  return wasm.linearSVM(new Float64Array(x), nFeatures, new Float64Array(y), lambda, maxIter, learningRate);
 }
 
 // ============================================================================
@@ -1178,7 +1181,7 @@ export async function hierarchicalClustering(
   nClusters: number
 ): Promise<number[]> {
   const wasm = await ensureInit();
-  const result = wasm.hierarchical_clustering(new Float64Array(x), nFeatures, nClusters);
+  const result = wasm.hierarchicalClustering(new Float64Array(x), nFeatures, nClusters);
   return Array.from(result);
 }
 
@@ -1187,13 +1190,12 @@ export async function hierarchicalClustering(
  */
 export async function kmeansPlus(
   x: number[],
+  nFeatures: number,
   nClusters: number,
-  maxIter: number,
-  nSamples: number,
-  nFeatures: number
-): Promise<any> {
+  maxIter: number = 100
+): Promise<number[]> {
   const wasm = await ensureInit();
-  return wasm.kmeans_plus(new Float64Array(x), nClusters, maxIter, nSamples, nFeatures);
+  return Array.from(wasm.kmeansPlus(new Float64Array(x), nFeatures, nClusters, maxIter));
 }
 
 // ============================================================================
@@ -1204,17 +1206,18 @@ export async function kmeansPlus(
  * Standard Scaler (z-score normalization)
  * @example
  * ```ts
- * const scaled = await standardScaler(x, 100, 5);
+ * const scaled = await standardScaler(x, 5);
  * // Scales to mean=0, std=1
  * ```
  */
 export async function standardScaler(
   x: number[],
-  nSamples: number,
   nFeatures: number
 ): Promise<number[]> {
   const wasm = await ensureInit();
-  const result = wasm.standard_scaler(new Float64Array(x), nSamples, nFeatures);
+  const scaler = wasm.standardScaler(nFeatures);
+  const result = scaler.fitTransform(new Float64Array(x));
+  scaler.free();
   return Array.from(result);
 }
 
@@ -1223,11 +1226,12 @@ export async function standardScaler(
  */
 export async function minMaxScaler(
   x: number[],
-  nSamples: number,
   nFeatures: number
 ): Promise<number[]> {
   const wasm = await ensureInit();
-  const result = wasm.min_max_scaler(new Float64Array(x), nSamples, nFeatures);
+  const scaler = wasm.minMaxScaler(nFeatures);
+  const result = scaler.fitTransform(new Float64Array(x));
+  scaler.free();
   return Array.from(result);
 }
 
@@ -1236,67 +1240,76 @@ export async function minMaxScaler(
  */
 export async function robustScaler(
   x: number[],
-  nSamples: number,
   nFeatures: number
 ): Promise<number[]> {
   const wasm = await ensureInit();
-  const result = wasm.robust_scaler(new Float64Array(x), nSamples, nFeatures);
+  const scaler = wasm.robustScaler(nFeatures);
+  const result = scaler.fitTransform(new Float64Array(x));
+  scaler.free();
   return Array.from(result);
 }
 
 /**
  * Normalizer (L2 normalization)
  */
-export async function normalizer(x: number[], nSamples: number, nFeatures: number): Promise<number[]> {
+export async function normalizer(x: number[], nFeatures: number, norm: string = 'l2'): Promise<number[]> {
   const wasm = await ensureInit();
-  const result = wasm.normalizer(new Float64Array(x), nSamples, nFeatures);
-  return Array.from(result);
+  const result = wasm.normalizer(nFeatures, norm);
+  const transformed = result.fitTransform(new Float64Array(x));
+  result.free();
+  return Array.from(transformed);
 }
 
 /**
- * Label Encoder (converts string labels to integers)
+ * Label Encoder (converts labels to integers)
  * @example
  * ```ts
- * const encoded = await labelEncoder(y);
- * // Converts ['cat', 'dog', 'cat'] to [0, 1, 0]
+ * const encoded = await labelEncoder(y, 5);
  * ```
  */
-export async function labelEncoder(y: number[]): Promise<number[]> {
+export async function labelEncoder(y: number[], nFeatures: number = 1): Promise<number[]> {
   const wasm = await ensureInit();
-  const result = wasm.label_encoder(new Float64Array(y));
+  const encoder = wasm.labelEncoder();
+  const result = encoder.fitTransform(new Float64Array(y));
+  encoder.free();
   return Array.from(result);
 }
 
 /**
  * One-Hot Encoder (converts integers to binary vectors)
  */
-export async function oneHotEncoder(y: number[], nClasses: number): Promise<number[]> {
+export async function oneHotEncoder(y: number[], nFeatures: number): Promise<number[]> {
   const wasm = await ensureInit();
-  const result = wasm.one_hot_encoder(new Float64Array(y), nClasses);
+  const encoder = wasm.oneHotEncoder(nFeatures);
+  const result = encoder.fitTransform(new Float64Array(y));
+  encoder.free();
   return Array.from(result);
 }
 
 /**
  * Ordinal Encoder (converts categories to ordered integers)
  */
-export async function ordinalEncoder(y: number[]): Promise<number[]> {
+export async function ordinalEncoder(y: number[], nFeatures: number = 1): Promise<number[]> {
   const wasm = await ensureInit();
-  const result = wasm.ordinal_encoder(new Float64Array(y));
+  const encoder = wasm.ordinalEncoder(nFeatures);
+  const result = encoder.fitTransform(new Float64Array(y));
+  encoder.free();
   return Array.from(result);
 }
 
 /**
- * Simple Imputer (fills missing values with mean/median/mode)
+ * Simple Imputer (fills missing values with mean/median/most_frequent)
  */
 export async function simpleImputer(
   x: number[],
-  strategy: 'mean' | 'median' | 'most_frequent',
-  nSamples: number,
-  nFeatures: number
+  nFeatures: number,
+  strategy: 'mean' | 'median' | 'most_frequent' = 'mean',
+  fillValue: number = 0
 ): Promise<number[]> {
   const wasm = await ensureInit();
-  const strategyEnum = strategy === 'mean' ? 0 : strategy === 'median' ? 1 : 2;
-  const result = wasm.simple_imputer(new Float64Array(x), strategyEnum, nSamples, nFeatures);
+  const imputer = wasm.simpleImputer(nFeatures, strategy, fillValue);
+  const result = imputer.fitTransform(new Float64Array(x));
+  imputer.free();
   return Array.from(result);
 }
 
@@ -1314,7 +1327,7 @@ export async function simpleImputer(
  */
 export async function confusionMatrix(yTrue: number[], yPred: number[]): Promise<number[][]> {
   const wasm = await ensureInit();
-  const result = wasm.confusion_matrix(new Float64Array(yTrue), new Float64Array(yPred));
+  const result = wasm.confusionMatrix(new Float64Array(yTrue), new Float64Array(yPred));
 
   // Convert flat array to 2D matrix
   const nClasses = Math.max(...yTrue, ...yPred) + 1;
@@ -1333,12 +1346,20 @@ export async function classificationReport(
   yPred: number[]
 ): Promise<{ precision: number[]; recall: number[]; f1: number[]; support: number[] }> {
   const wasm = await ensureInit();
-  const result = wasm.classification_report(new Float64Array(yTrue), new Float64Array(yPred));
+  const precision = wasm.precision(new Float64Array(yTrue), new Float64Array(yPred), 0);
+  const recall = wasm.recall(new Float64Array(yTrue), new Float64Array(yPred), 0);
+  const f1Score = wasm.f1Score(new Float64Array(yTrue), new Float64Array(yPred));
+  const confusion = Array.from(wasm.confusionMatrix(new Float64Array(yTrue), new Float64Array(yPred)));
+  const nClasses = confusion.length;
+  const support = new Array(nClasses).fill(0);
+  for (let i = 0; i < yTrue.length; i++) {
+    support[yTrue[i]]++;
+  }
   return {
-    precision: Array.from(result.precision),
-    recall: Array.from(result.recall),
-    f1: Array.from(result.f1),
-    support: Array.from(result.support),
+    precision: Array.isArray(precision) ? Array.from(precision) : [precision],
+    recall: Array.isArray(recall) ? Array.from(recall) : [recall],
+    f1: Array.isArray(f1Score) ? Array.from(f1Score) : [f1Score],
+    support,
   };
 }
 
@@ -1352,12 +1373,11 @@ export async function classificationReport(
  */
 export async function silhouetteScore(
   x: number[],
-  labels: number[],
-  nSamples: number,
-  nFeatures: number
+  nFeatures: number,
+  labels: number[]
 ): Promise<number> {
   const wasm = await ensureInit();
-  return wasm.silhouette_score(new Float64Array(x), new Float64Array(labels), nSamples, nFeatures);
+  return wasm.silhouetteScore(new Float64Array(x), nFeatures, new Float64Array(labels));
 }
 
 /**
@@ -1365,12 +1385,11 @@ export async function silhouetteScore(
  */
 export async function calinskiHarabaszScore(
   x: number[],
-  labels: number[],
-  nSamples: number,
-  nFeatures: number
+  nFeatures: number,
+  labels: number[]
 ): Promise<number> {
   const wasm = await ensureInit();
-  return wasm.calinski_harabasz_score(new Float64Array(x), new Float64Array(labels), nSamples, nFeatures);
+  return wasm.calinskiHarabaszScore(new Float64Array(x), nFeatures, new Float64Array(labels));
 }
 
 /**
@@ -1378,12 +1397,11 @@ export async function calinskiHarabaszScore(
  */
 export async function daviesBouldinScore(
   x: number[],
-  labels: number[],
-  nSamples: number,
-  nFeatures: number
+  nFeatures: number,
+  labels: number[]
 ): Promise<number> {
   const wasm = await ensureInit();
-  return wasm.davies_bouldin_score(new Float64Array(x), new Float64Array(labels), nSamples, nFeatures);
+  return wasm.daviesBouldinScore(new Float64Array(x), nFeatures, new Float64Array(labels));
 }
 
 // ============================================================================
@@ -1394,7 +1412,7 @@ export async function daviesBouldinScore(
  * Cross-Validation Score
  * @example
  * ```ts
- * const scores = await crossValidateScore(x, y, 5, 100, 10);
+ * const scores = await crossValidateScore(x, y, 5, 'decision_tree', 10);
  * // Returns 5 CV scores
  * ```
  */
@@ -1402,11 +1420,20 @@ export async function crossValidateScore(
   x: number[],
   y: number[],
   cvFolds: number,
-  nSamples: number,
-  nFeatures: number
+  modelType: string = 'decision_tree',
+  nFeatures?: number
 ): Promise<number[]> {
   const wasm = await ensureInit();
-  const result = wasm.cross_validate_score(new Float64Array(x), new Float64Array(y), cvFolds, nSamples, nFeatures);
+  const nFeaturesVal = nFeatures ?? (y.length > 0 ? Math.floor(x.length / y.length) : 1);
+  const modelParams = new Float64Array([modelType === 'decision_tree' ? 10 : 100]);
+  const result = wasm.crossValidateScore(
+    new Float64Array(x),
+    nFeaturesVal,
+    new Float64Array(y),
+    cvFolds,
+    modelType,
+    modelParams
+  );
   return Array.from(result);
 }
 
@@ -1416,8 +1443,7 @@ export async function crossValidateScore(
 export async function trainTestSplit(
   x: number[],
   y: number[],
-  testSize: number,
-  nSamples: number,
+  trainRatio: number,
   nFeatures: number
 ): Promise<{
   xTrain: number[];
@@ -1426,12 +1452,18 @@ export async function trainTestSplit(
   yTest: number[];
 }> {
   const wasm = await ensureInit();
-  const result = wasm.train_test_split(new Float64Array(x), new Float64Array(y), testSize, nSamples, nFeatures);
+  const result = wasm.trainTestSplit(new Float64Array(x), nFeatures, new Float64Array(y), trainRatio);
+  // Result is a flat Float64Array: [x_train..., x_test..., y_train..., y_test...]
+  const totalSamples = x.length / nFeatures;
+  const trainSize = Math.floor(totalSamples * trainRatio);
+  const testSize = totalSamples - trainSize;
+  const trainFeatureCount = trainSize * nFeatures;
+  const testFeatureCount = testSize * nFeatures;
   return {
-    xTrain: Array.from(result.x_train),
-    xTest: Array.from(result.x_test),
-    yTrain: Array.from(result.y_train),
-    yTest: Array.from(result.y_test),
+    xTrain: Array.from(result.slice(0, trainFeatureCount)),
+    xTest: Array.from(result.slice(trainFeatureCount, trainFeatureCount + testFeatureCount)),
+    yTrain: Array.from(result.slice(trainFeatureCount + testFeatureCount, trainFeatureCount + testFeatureCount + trainSize)),
+    yTest: Array.from(result.slice(trainFeatureCount + testFeatureCount + trainSize, trainFeatureCount + testFeatureCount + trainSize + testSize)),
   };
 }
 
@@ -1440,16 +1472,17 @@ export async function trainTestSplit(
 // ============================================================================
 
 /**
- * Feature Importance (for Decision Tree)
+ * Feature Importance (for Decision Tree) — trains a tree first, then extracts importance
  */
 export async function featureImportance(
   x: number[],
   y: number[],
-  nSamples: number,
-  nFeatures: number
+  nFeatures: number,
+  maxDepth: number = 10
 ): Promise<number[]> {
   const wasm = await ensureInit();
-  const result = wasm.feature_importance(new Float64Array(x), new Float64Array(y), nSamples, nFeatures);
+  const tree = wasm.decisionTreeClassify(new Float64Array(x), nFeatures, new Float64Array(y), maxDepth, 2);
+  const result = wasm.featureImportance(tree);
   return Array.from(result);
 }
 
@@ -1459,20 +1492,14 @@ export async function featureImportance(
 export async function featureImportanceForest(
   x: number[],
   y: number[],
+  nFeatures: number,
   nTrees: number,
-  maxDepth: number,
-  nSamples: number,
-  nFeatures: number
+  maxDepth: number = 10
 ): Promise<number[]> {
   const wasm = await ensureInit();
-  const result = wasm.feature_importance_forest(
-    new Float64Array(x),
-    new Float64Array(y),
-    nTrees,
-    maxDepth,
-    nSamples,
-    nFeatures
-  );
+  const tree = wasm.randomForestClassify(new Float64Array(x), nFeatures, new Float64Array(y), nTrees, maxDepth, 2);
+  const result = wasm.featureImportanceForest(tree as unknown as Float64Array, nTrees, nFeatures);
+  tree.free();
   return Array.from(result);
 }
 
@@ -1485,7 +1512,7 @@ export async function featureImportanceForest(
  */
 export async function meanAbsoluteError(yTrue: number[], yPred: number[]): Promise<number> {
   const wasm = await ensureInit();
-  return wasm.mean_absolute_error(new Float64Array(yTrue), new Float64Array(yPred));
+  return wasm.meanAbsoluteError(new Float64Array(yTrue), new Float64Array(yPred));
 }
 
 /**
@@ -1493,7 +1520,7 @@ export async function meanAbsoluteError(yTrue: number[], yPred: number[]): Promi
  */
 export async function meanSquaredError(yTrue: number[], yPred: number[]): Promise<number> {
   const wasm = await ensureInit();
-  return wasm.mean_squared_error(new Float64Array(yTrue), new Float64Array(yPred));
+  return wasm.meanSquaredError(new Float64Array(yTrue), new Float64Array(yPred));
 }
 
 /**
@@ -1501,19 +1528,7 @@ export async function meanSquaredError(yTrue: number[], yPred: number[]): Promis
  */
 export async function r2Score(yTrue: number[], yPred: number[]): Promise<number> {
   const wasm = await ensureInit();
-  return wasm.r2_score(new Float64Array(yTrue), new Float64Array(yPred));
-}
-
-/**
- * Adjusted R² Score
- */
-export async function adjustedR2Score(
-  yTrue: number[],
-  yPred: number[],
-  nFeatures: number
-): Promise<number> {
-  const wasm = await ensureInit();
-  return wasm.adjusted_r2_score(new Float64Array(yTrue), new Float64Array(yPred), nFeatures);
+  return wasm.r2Score(new Float64Array(yTrue), new Float64Array(yPred));
 }
 
 /**
@@ -1521,15 +1536,7 @@ export async function adjustedR2Score(
  */
 export async function medianAbsoluteError(yTrue: number[], yPred: number[]): Promise<number> {
   const wasm = await ensureInit();
-  return wasm.median_absolute_error(new Float64Array(yTrue), new Float64Array(yPred));
-}
-
-/**
- * Explained Variance Score
- */
-export async function explainedVarianceScore(yTrue: number[], yPred: number[]): Promise<number> {
-  const wasm = await ensureInit();
-  return wasm.explained_variance_score(new Float64Array(yTrue), new Float64Array(yPred));
+  return wasm.medianAbsoluteError(new Float64Array(yTrue), new Float64Array(yPred));
 }
 
 /**

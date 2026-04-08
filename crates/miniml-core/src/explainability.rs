@@ -421,8 +421,8 @@ mod tests {
         let interval = prediction_interval(&predictions, 0.95).unwrap();
 
         assert_eq!(interval.length(), 2);
-        let lower = interval.get(0).and_then(|v| v.as_f64()).unwrap();
-        let upper = interval.get(1).and_then(|v| v.as_f64()).unwrap();
+        let lower = interval.get(0).as_f64().unwrap();
+        let upper = interval.get(1).as_f64().unwrap();
 
         assert!(lower < upper);
         assert!(lower >= 0.45); // Minimum value

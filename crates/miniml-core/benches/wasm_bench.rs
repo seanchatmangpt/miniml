@@ -1,6 +1,6 @@
 //! Comprehensive WASM Performance Benchmarks
 //!
-//! Direct Rust benchmarks for all ML algorithms in micro-ml-core.
+//! Direct Rust benchmarks for all ML algorithms in miniml-core.
 //! This measures pure WASM performance without TypeScript wrapper overhead.
 
 use std::time::{Duration, Instant};
@@ -9,7 +9,7 @@ use std::time::{Duration, Instant};
 use criterion::{black_box, criterion_group, criterion_main, Criterion, BenchmarkId};
 
 // Import all algorithms
-use micro_ml_core::{
+use miniml_core::{
     // Classification
     knn_fit_impl, KnnModel,
     decision_tree_impl, DecisionTreeModel,

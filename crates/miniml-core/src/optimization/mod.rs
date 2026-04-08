@@ -79,3 +79,6 @@ pub mod drift;
 // Re-export module items
 pub use bandit::*;
 pub use drift::*;
+pub use anomaly::*;
+pub use genetic::rand_f64;
+pub use genetic::seed_rng;

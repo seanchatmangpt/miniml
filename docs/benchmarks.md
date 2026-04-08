@@ -6,6 +6,8 @@ This document presents performance benchmarks for every algorithm in miniml, alo
 
 **Blue Ocean Strategy** = Creating uncontested market space by offering unique value that competitors don't provide.
 
+**Current State:** 70+ algorithms across 15 families, 110 benchmarks across 26 categories
+
 ---
 
 ## Executive Summary
@@ -18,6 +20,15 @@ This document presents performance benchmarks for every algorithm in miniml, alo
 | **Optimization Suite** | GA, PSO, SA, Bandit | Metaheuristic optimization not available in any browser ML library |
 | **Advanced Analytics** | Drift, anomaly, prediction | Enterprise-grade monitoring capabilities in client-side code |
 | **Time Series** | 10 algorithms | Complete time series toolkit in <150KB |
+| **Probabilistic Methods** | MC, HMM, MCMC, Markov Chains | Complete probabilistic toolkit in browser (unique) |
+| **Statistical Inference** | Distributions, hypothesis testing | First browser library with full statistical inference |
+| **Kernel Methods** | RBF, Polynomial, Sigmoid | Kernel methods for SVM and GP in browser |
+| **Bayesian Methods** | Bayesian estimation, Bayes regression | Bayesian ML in browser (unique) |
+| **Gaussian Processes** | GP fit, GP predict | GP with uncertainty quantification (unique) |
+| **Survival Analysis** | Kaplan-Meier, Cox PH | Survival analysis in browser (unique) |
+| **Association Rules** | Apriori | Market basket analysis in browser (unique) |
+| **Recommendation Systems** | Matrix factorization, collaborative filtering | Recommender systems in browser (unique) |
+| **Graph Algorithms** | PageRank, shortest path, community detection | Graph ML in browser (unique) |
 
 ---
 
@@ -860,9 +871,10 @@ Trend Forecasting: 1ms
 
 1. **AutoML First** — Only browser library with GA feature selection + PSO hyperparameter optimization
 2. **Advanced Analytics** — Only browser library with drift detection, anomaly detection, bandit algorithms
-3. **Comprehensive** — 30+ algorithms in 145KB (vs competitors: fewer algorithms in 5-10× larger packages)
+3. **Comprehensive** — 70+ algorithms across 15 families in 145KB (vs competitors: fewer algorithms in 5-10× larger packages)
 4. **Privacy-First** — Everything runs locally; no data ever leaves the browser
 5. **Zero Infrastructure** — No cloud accounts, no API keys, no servers needed
+6. **Unique Capabilities** — Probabilistic methods, statistical inference, Bayesian ML, Gaussian processes, survival analysis, graph algorithms (all browser-first)
 
 **Markets Created:**
 
@@ -882,13 +894,21 @@ Trend Forecasting: 1ms
 | Metric | miniml | TensorFlow.js | ml.js | Python (scikit-learn) |
 |--------|--------|---------------|-------|----------------------|
 | **Bundle Size** | 145KB | 500KB+ | 150KB | N/A (server) |
-| **Algorithms** | 30+ | 100+ | 15 | 100+ |
+| **Algorithms** | 70+ | 100+ | 15 | 100+ |
+| **Families** | 15 | ~10 | ~3 | ~15 |
 | **AutoML** | ✅ GA + PSO | ❌ | ❌ | ✅ (separate libraries) |
 | **SIMD** | ✅ | ❌ | ❌ | ✅ (native) |
 | **Privacy** | ✅ Local only | ❌ Data may leave | ❌ Data may leave | ❌ Server-side |
 | **Infrastructure** | ✅ None needed | ❌ Requires setup | ❌ Requires setup | ❌ Server required |
-| **Advanced Analytics** | ✅ Drift, Anomaly, Bandit | ❌ | ❌ | ✅ (separate libraries) |
-| **Time Series** | ✅ 10 algorithms | ❌ | ❌ | ✅ (separate libraries) |
+| **Probabilistic** | ✅ MC, HMM, MCMC, Markov | ❌ | ❌ | ✅ (separate libraries) |
+| **Statistical** | ✅ Distributions, tests | ❌ | ❌ | ✅ (separate libraries) |
+| **Kernels** | ✅ RBF, Poly, Sigmoid | ❌ | ❌ | ✅ (separate libraries) |
+| **Bayesian** | ✅ Estimation, regression | ❌ | ❌ | ✅ (separate libraries) |
+| **Gaussian Processes** | ✅ Fit, predict | ❌ | ❌ | ✅ (separate libraries) |
+| **Survival** | ✅ Kaplan-Meier, Cox PH | ❌ | ❌ | ✅ (separate libraries) |
+| **Association** | ✅ Apriori | ❌ | ❌ | ✅ (separate libraries) |
+| **Recommendation** | ✅ Matrix factorization | ❌ | ❌ | ✅ (separate libraries) |
+| **Graph** | ✅ PageRank, shortest path | ❌ | ❌ | ✅ (separate libraries) |
 | **Blue Ocean Capabilities** | ✅ Unique | ❌ Commodity | ❌ Commodity | ❌ Server-dependent |
 
 ---
@@ -900,7 +920,7 @@ Trend Forecasting: 1ms
 1. **Bringing server-only capabilities to the browser** — AutoML, ensembles, optimization, advanced analytics
 2. **Eliminating infrastructure dependencies** — No cloud, no servers, no API keys
 3. **Enabling privacy-first ML** — All computation happens locally
-4. **Providing comprehensive coverage** — 30+ algorithms in a single 145KB package
+4. **Providing comprehensive coverage** — 70+ algorithms across 15 families in a single 145KB package
 5. **Delivering production-grade performance** — SIMD acceleration, sub-millisecond predictions
 
 **The result:** A unique market position that competitors don't occupy — browser-based ML with enterprise-grade capabilities, zero infrastructure, and complete privacy.

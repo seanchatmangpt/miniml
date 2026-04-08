@@ -1,11 +1,11 @@
 //! AutoML Pipeline Optimization (TPOT2-inspired)
 //!
-//! Automated machine learning for micro-ml:
+//! Automated machine learning for miniml:
 //! - Automated algorithm selection
 //! - Genetic feature selection
 //! - Hyperparameter optimization
 //!
-//! Inspired by TPOT2 but adapted for micro-ml's constraints.
+//! Inspired by TPOT2 but adapted for miniml's constraints.
 
 use wasm_bindgen::prelude::*;
 use std::cell::RefCell;
@@ -13,6 +13,35 @@ use crate::error::MlError;
 use crate::optimization::genetic::{GeneticAlgorithm, GeneticOptions};
 use crate::optimization::pso::{PSO, PSOOptions};
 use crate::optimization::{FitnessFunction, Individual, OptimizationResult};
+use crate::knn::knn_fit_impl;
+use crate::decision_tree::decision_tree_impl;
+use crate::naive_bayes::naive_bayes_impl;
+use crate::logistic::logistic_regression_impl;
+use crate::perceptron::perceptron_impl;
+use crate::linear_regression::ridge_regression_impl;
+use crate::polynomial::polynomial_regression_impl;
+use crate::regression_metrics::r2_score_impl;
+
+// ── helpers ──────────────────────────────────────────────────────────
+
+/// Flatten 2D row-major data into a flat Vec<f64>
+fn flatten_data(x: &[Vec<f64>]) -> Vec<f64> {
+    x.iter().flat_map(|row| row.iter().copied()).collect()
+}
+
+/// Convert Vec<u32> predictions to Vec<f64>
+fn preds_to_f64(preds: &[u32]) -> Vec<f64> {
+    preds.iter().map(|&p| p as f64).collect()
+}
+
+/// Simple accuracy: fraction of matches within tolerance
+fn accuracy_simple(y_true: &[f64], y_pred: &[f64]) -> f64 {
+    if y_true.is_empty() { return 0.0; }
+    let correct = y_true.iter().zip(y_pred.iter())
+        .filter(|&(t, p)| (t - p).abs() < 0.5)
+        .count();
+    correct as f64 / y_true.len() as f64
+}
 
 /// Progress stage for AutoML operations
 #[derive(Clone, Debug)]
@@ -414,82 +443,134 @@ impl AutoMLEngine {
         }
     }
 
-    fn evaluate_algorithm_cv(&self, _algorithm: AlgorithmType, x: &[Vec<f64>], y: &[f64]) -> f64 {
-        // Simplified cross-validation: train on 80%, test on 20%
-        let split_idx = (x.len() * 4) / 5;
+    fn evaluate_algorithm_cv(&self, algorithm: AlgorithmType, x: &[Vec<f64>], y: &[f64]) -> f64 {
+        let n_samples = x.len();
+        let n_features = if x.is_empty() { 0 } else { x[0].len() };
+        if n_samples == 0 || n_features == 0 { return 0.0; }
 
-        if split_idx == 0 || x.is_empty() {
-            return 0.0;
+        let cv_folds = self.options.cv_folds.max(2).min(n_samples);
+        let fold_size = n_samples / cv_folds;
+
+        // Detect problem type
+        let is_classification = y.iter().all(|&yi| {
+            let rounded = yi.round();
+            (yi - rounded).abs() < 0.01 && rounded >= 0.0 && rounded <= 10.0
+        });
+
+        let mut total_score = 0.0;
+
+        for fold in 0..cv_folds {
+            let test_start = fold * fold_size;
+            let test_end = if fold == cv_folds - 1 { n_samples } else { (fold + 1) * fold_size };
+
+            // Build train/test splits
+            let mut train_data = Vec::new();
+            let mut train_labels = Vec::new();
+            let mut test_data = Vec::new();
+            let mut test_labels = Vec::new();
+
+            for i in 0..n_samples {
+                if i >= test_start && i < test_end {
+                    test_data.extend_from_slice(&x[i]);
+                    test_labels.push(y[i]);
+                } else {
+                    train_data.extend_from_slice(&x[i]);
+                    train_labels.push(y[i]);
+                }
+            }
+
+            if test_data.is_empty() || train_data.is_empty() { continue; }
+
+            let score = if is_classification {
+                self.eval_classification_fold(algorithm, &train_data, &train_labels, &test_data, &test_labels, n_features)
+            } else {
+                self.eval_regression_fold(algorithm, &train_data, &train_labels, &test_data, &test_labels, n_features)
+            };
+
+            total_score += score;
         }
 
-        let train_x = &x[..split_idx];
-        let train_y = &y[..split_idx];
-        let test_x = &x[split_idx..];
-        let test_y = &y[split_idx..];
+        total_score / cv_folds as f64
+    }
 
-        // Simple evaluation: R² for regression, accuracy for classification
-        let is_classification = train_y.iter().all(|&yi| yi == 0.0 || yi == 1.0);
-
-        if is_classification {
-            // For classification: predict based on nearest neighbor
-            let mut correct = 0;
-            for (test_x_i, &test_y_i) in test_x.iter().zip(test_y.iter()) {
-                // Find nearest neighbor in training set
-                let mut best_dist = f64::MAX;
-                let mut best_label = 0.0;
-                for (train_x_i, &train_y_i) in train_x.iter().zip(train_y.iter()) {
-                    let dist: f64 = test_x_i.iter().zip(train_x_i.iter())
-                        .map(|(a, b)| (a - b).powi(2))
-                        .sum::<f64>()
-                        .sqrt();
-                    if dist < best_dist {
-                        best_dist = dist;
-                        best_label = train_y_i;
-                    }
-                }
-                if (best_label - test_y_i).abs() < 0.5 {
-                    correct += 1;
+    /// Evaluate a classification algorithm on a single fold
+    fn eval_classification_fold(
+        &self, algorithm: AlgorithmType,
+        train_data: &[f64], train_labels: &[f64],
+        test_data: &[f64], test_labels: &[f64],
+        n_features: usize,
+    ) -> f64 {
+        let predictions: Vec<f64> = match algorithm {
+            AlgorithmType::KNearestNeighbors => {
+                let k = 3.min(train_labels.len());
+                match knn_fit_impl(train_data, n_features, train_labels, k) {
+                    Ok(model) => preds_to_f64(&model.predict(test_data)),
+                    Err(_) => return 0.0,
                 }
             }
-            correct as f64 / test_y.len() as f64
-        } else {
-            // For regression: use simple correlation-based scoring
-            // Calculate correlation between each feature and target
-            let mut score = 0.0;
-            let n_features = x[0].len();
-
-            for feat_idx in 0..n_features {
-                // Get feature column
-                let feature_col: Vec<f64> = train_x.iter().map(|row| row[feat_idx]).collect();
-
-                // Calculate means
-                let mean_x = feature_col.iter().sum::<f64>() / feature_col.len() as f64;
-                let mean_y = train_y.iter().sum::<f64>() / train_y.len() as f64;
-
-                // Calculate correlation
-                let mut numerator = 0.0;
-                let mut var_x = 0.0;
-                let mut var_y = 0.0;
-
-                for (&xi, &yi) in feature_col.iter().zip(train_y.iter()) {
-                    let x_centered = xi - mean_x;
-                    let y_centered = yi - mean_y;
-                    numerator += x_centered * y_centered;
-                    var_x += x_centered * x_centered;
-                    var_y += y_centered * y_centered;
+            AlgorithmType::DecisionTree => {
+                match decision_tree_impl(train_data, n_features, train_labels, 10, 2, true) {
+                    Ok(model) => model.predict(test_data),
+                    Err(_) => return 0.0,
                 }
-
-                let correlation = if var_x > 1e-10 && var_y > 1e-10 {
-                    (numerator / (var_x * var_y).sqrt()).abs()
-                } else {
-                    0.0
-                };
-
-                score += correlation;
             }
+            AlgorithmType::NaiveBayes => {
+                match naive_bayes_impl(train_data, n_features, train_labels) {
+                    Ok(model) => preds_to_f64(&model.predict(test_data)),
+                    Err(_) => return 0.0,
+                }
+            }
+            AlgorithmType::LogisticRegression => {
+                match logistic_regression_impl(train_data, n_features, train_labels, 0.01, 100, 0.01) {
+                    Ok(model) => preds_to_f64(&model.predict(test_data)),
+                    Err(_) => return 0.0,
+                }
+            }
+            AlgorithmType::Perceptron => {
+                match perceptron_impl(train_data, n_features, train_labels, 0.01, 100) {
+                    Ok(model) => preds_to_f64(&model.predict(test_data)),
+                    Err(_) => return 0.0,
+                }
+            }
+            _ => return 0.0, // Regression algorithm used for classification — skip
+        };
 
-            // Average correlation across features
-            score / n_features as f64
+        accuracy_simple(test_labels, &predictions)
+    }
+
+    /// Evaluate a regression algorithm on a single fold
+    fn eval_regression_fold(
+        &self, algorithm: AlgorithmType,
+        train_data: &[f64], train_labels: &[f64],
+        test_data: &[f64], test_labels: &[f64],
+        n_features: usize,
+    ) -> f64 {
+        let predictions: Vec<f64> = match algorithm {
+            AlgorithmType::LinearRegression => {
+                match ridge_regression_impl(train_data, n_features, train_labels, 0.01) {
+                    Ok(model) => model.predict(test_data),
+                    Err(_) => return 0.0,
+                }
+            }
+            AlgorithmType::PolynomialRegression => {
+                // Use first feature for univariate polynomial fit
+                let n_train = train_labels.len();
+                let n_test = test_labels.len();
+                if n_features == 0 { return 0.0; }
+                let train_x: Vec<f64> = (0..n_train).map(|i| train_data[i * n_features]).collect();
+                let test_x: Vec<f64> = (0..n_test).map(|i| test_data[i * n_features]).collect();
+                match polynomial_regression_impl(&train_x, train_labels, 2) {
+                    Ok(model) => model.predict(&test_x),
+                    Err(_) => return 0.0,
+                }
+            }
+            _ => return 0.0, // Classification algorithm used for regression — skip
+        };
+
+        // Score with R-squared, clamped to [0, 1]
+        match r2_score_impl(test_labels, &predictions) {
+            Ok(r2) => r2.max(0.0),
+            Err(_) => 0.0,
         }
     }
 
@@ -989,14 +1070,8 @@ mod tests {
         let engine = AutoMLEngine::new(AutoMLOptions::default())
             .with_early_stopping(false); // Disable early stopping for this test
 
-        let x = vec![
-            vec![1.0, 2.0],
-            vec![2.0, 3.0],
-            vec![3.0, 4.0],
-            vec![4.0, 5.0],
-            vec![5.0, 6.0],
-        ];
-        let y = vec![2.0, 3.0, 4.0, 5.0, 6.0];
+        let x: Vec<Vec<f64>> = (1..=10).map(|i| vec![i as f64, (i + 1) as f64]).collect();
+        let y: Vec<f64> = (1..=10).map(|i| 2.0 * i as f64 + 1.0).collect();
 
         let result = engine.select_algorithm(&x, &y);
 
@@ -1194,5 +1269,169 @@ mod tests {
         assert_eq!(result.original_features, 3);
         assert!(result.selected_features.len() <= result.original_features);
         assert!(result.feature_selection_performed || result.selected_features.len() == 3);
+    }
+
+    // ═══════════════════════ JTBD QUALITY TESTS ═══════════════════════
+
+    #[test]
+    fn test_automl_finds_good_classifier_on_separable_data() {
+        // JTBD: "Given clearly separable clusters, AutoML should find a classifier with high accuracy."
+        let engine = AutoMLEngine::new(AutoMLOptions::default())
+            .with_early_stopping(false);
+
+        let x = vec![
+            vec![0.0, 0.0], vec![0.1, 0.1], vec![-0.1, 0.1],
+            vec![0.0, -0.1], vec![0.1, -0.1], vec![-0.1, -0.1],
+            vec![5.0, 5.0], vec![5.1, 5.1], vec![4.9, 5.0],
+            vec![5.0, 4.9], vec![5.1, 4.9], vec![4.9, 5.1],
+        ];
+        let y = vec![0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0];
+
+        let result = engine.select_algorithm(&x, &y);
+
+        assert_eq!(result.problem_type, "classification");
+        assert!(result.best_score >= 0.8,
+            "Expected accuracy >= 0.8 on separable data, got {:.4}", result.best_score);
+    }
+
+    #[test]
+    fn test_automl_finds_good_regressor_on_linear_data() {
+        // JTBD: "Given linear data, AutoML should find a regressor with high R²."
+        let engine = AutoMLEngine::new(AutoMLOptions::default())
+            .with_early_stopping(false);
+
+        let x: Vec<Vec<f64>> = (1..=15).map(|i| vec![i as f64]).collect();
+        let y: Vec<f64> = (1..=15).map(|i| 3.0 * i as f64 + 2.0).collect();
+
+        let result = engine.select_algorithm(&x, &y);
+
+        assert_eq!(result.problem_type, "regression");
+        assert!(result.best_score >= 0.9,
+            "Expected R² >= 0.9 on linear data, got {:.4}", result.best_score);
+    }
+
+    #[test]
+    fn test_automl_scores_differ_across_algorithms() {
+        // JTBD: "AutoML should actually compare distinct models, not give all algorithms the same score."
+        let engine = AutoMLEngine::new(AutoMLOptions::default())
+            .with_early_stopping(false);
+
+        let x = vec![
+            vec![1.0, 1.0], vec![1.5, 1.2], vec![2.0, 1.8], vec![1.2, 2.0], vec![1.8, 1.5],
+            vec![2.5, 2.2], vec![3.0, 2.8], vec![2.8, 3.0], vec![3.2, 2.5], vec![3.5, 3.2],
+            vec![5.0, 5.0], vec![5.5, 5.2], vec![6.0, 5.8], vec![5.2, 6.0], vec![5.8, 5.5],
+            vec![6.5, 6.2], vec![7.0, 6.8], vec![6.8, 7.0], vec![7.2, 6.5], vec![7.5, 7.2],
+        ];
+        let y = vec![0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+                  1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0];
+
+        let result = engine.select_algorithm(&x, &y);
+
+        let scores: Vec<f64> = result.algorithm_scores.iter()
+            .filter_map(|s| s.split(':').nth(1)?.parse::<f64>().ok())
+            .collect();
+
+        let unique_scores: std::collections::HashSet<i64> = scores.iter()
+            .map(|s| ((s * 1000.0).round()) as i64)
+            .collect();
+
+        assert!(unique_scores.len() > 1,
+            "All algorithms received identical scores -- evaluate_algorithm_cv is not using the algorithm parameter");
+    }
+
+    #[test]
+    fn test_automl_evaluates_all_algorithms_when_early_stopping_off() {
+        // JTBD: "With early stopping disabled, all candidate algorithms should be evaluated."
+        let engine = AutoMLEngine::new(AutoMLOptions::default())
+            .with_early_stopping(false);
+
+        let x: Vec<Vec<f64>> = (1..=15).map(|i| vec![i as f64, (i as f64) * 0.5]).collect();
+        let y: Vec<f64> = (1..=15).map(|i| 2.0 * i as f64 + 1.0).collect();
+
+        let result = engine.select_algorithm(&x, &y);
+
+        assert_eq!(result.evaluations, 2,
+            "Expected 2 evaluations for regression, got {}", result.evaluations);
+        assert_eq!(result.algorithm_scores.len(), 2);
+    }
+
+    #[test]
+    fn test_automl_detects_problem_type_correctly() {
+        // JTBD: "AutoML should auto-detect classification vs regression and evaluate the right set."
+        let engine = AutoMLEngine::new(AutoMLOptions::default())
+            .with_early_stopping(false);
+
+        let x: Vec<Vec<f64>> = (1..=15).map(|i| vec![i as f64]).collect();
+
+        // Classification: integer labels
+        let y_cls = vec![0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 1.0, 1.0, 0.0];
+        let result_cls = engine.select_algorithm(&x, &y_cls);
+        assert_eq!(result_cls.problem_type, "classification");
+        assert_eq!(result_cls.evaluations, 5);
+
+        // Regression: continuous labels
+        let y_reg: Vec<f64> = (1..=15).map(|i| 2.5 * i as f64 + 0.3).collect();
+        let result_reg = engine.select_algorithm(&x, &y_reg);
+        assert_eq!(result_reg.problem_type, "regression");
+        assert_eq!(result_reg.evaluations, 2);
+    }
+
+    #[test]
+    fn test_automl_uses_cv_folds_not_single_split() {
+        // JTBD: "The cv_folds parameter should actually control evaluation robustness."
+        // Use data with noise so different fold splits produce different R² scores.
+        let x: Vec<Vec<f64>> = (1..=20).map(|i| vec![i as f64]).collect();
+        let y: Vec<f64> = (1..=20).map(|i| 3.0 * i as f64 + 2.0 + ((i * 7 + 3) % 5) as f64 * 0.5).collect();
+
+        let mut opts_5 = AutoMLOptions::default();
+        opts_5.cv_folds = 5;
+        let engine_5 = AutoMLEngine::new(opts_5).with_early_stopping(false);
+        let result_5 = engine_5.select_algorithm(&x, &y);
+
+        let mut opts_2 = AutoMLOptions::default();
+        opts_2.cv_folds = 2;
+        let engine_2 = AutoMLEngine::new(opts_2).with_early_stopping(false);
+        let result_2 = engine_2.select_algorithm(&x, &y);
+
+        assert_ne!(result_5.best_score, result_2.best_score,
+            "5-fold and 2-fold CV produced identical scores -- cv_folds is not being used");
+    }
+
+    #[test]
+    fn test_automl_score_reflects_model_performance_not_correlation() {
+        // JTBD: "The score should reflect actual model performance, not feature-target correlation."
+        let engine = AutoMLEngine::new(AutoMLOptions::default())
+            .with_early_stopping(false);
+
+        // y = x² relationship — actual polynomial fit gives high R²
+        let x: Vec<Vec<f64>> = (1..=20).map(|i| vec![i as f64]).collect();
+        let y: Vec<f64> = (1..=20).map(|i| (i as f64).powi(2)).collect();
+
+        let result = engine.select_algorithm(&x, &y);
+
+        assert!(result.best_score >= 0.5,
+            "Score {:.4} is too low -- evaluate_algorithm_cv may not be training models", result.best_score);
+    }
+
+    #[test]
+    fn test_automl_ranks_better_algorithm_higher() {
+        // JTBD: "On quadratic data, PolynomialRegression should score higher than LinearRegression."
+        let engine = AutoMLEngine::new(AutoMLOptions::default())
+            .with_early_stopping(false);
+
+        let x: Vec<Vec<f64>> = (1..=15).map(|i| vec![i as f64]).collect();
+        let y: Vec<f64> = (1..=15).map(|i| 0.5 * (i as f64).powi(2)).collect();
+
+        let result = engine.select_algorithm(&x, &y);
+
+        let lin_score = result.algorithm_score("LinearRegression");
+        let poly_score = result.algorithm_score("PolynomialRegression");
+
+        assert!(lin_score.is_some(), "LinearRegression should have been evaluated");
+        assert!(poly_score.is_some(), "PolynomialRegression should have been evaluated");
+
+        assert!(poly_score.unwrap() > lin_score.unwrap(),
+            "PolynomialRegression ({:.4}) should outperform LinearRegression ({:.4}) on quadratic data",
+            poly_score.unwrap(), lin_score.unwrap());
     }
 }

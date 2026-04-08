@@ -1,10 +1,10 @@
 [package]
 name = "miniml-core"
-version = "1.0.0"
+version = "26.4.8"
 edition = "2021"
 authors = ["Sean Chatman <info@chatmangpt.com>"]
 description = "A minimal, blazing-fast WASM-powered machine learning library with SIMD acceleration"
-license = "MIT"
+license = "BSL-1.1"
 repository = "https://github.com/seanchatmangpt/miniml"
 keywords = ["machine-learning", "regression", "wasm", "statistics", "minimal", "simd"]
 categories = ["wasm", "science", "mathematics"]

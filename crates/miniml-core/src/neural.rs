@@ -5,6 +5,8 @@
 use crate::error::MlError;
 use serde::{Deserialize, Serialize};
 use wasm_bindgen::prelude::*;
+#[cfg(target_arch = "wasm32")]
+use js_sys;
 
 /// Layer types
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -448,9 +450,13 @@ struct XorShift64 {
 
 impl XorShift64 {
     fn new() -> Self {
-        // Use current time as seed
-        let now = js_sys::Date::now();
-        Self { state: now as u64 }
+        // Use a fixed seed for deterministic results
+        // When compiled to WASM, js_sys::Date::now() would be available
+        #[cfg(target_arch = "wasm32")]
+        let seed = js_sys::Date::now() as u64;
+        #[cfg(not(target_arch = "wasm32"))]
+        let seed = 42u64;
+        Self { state: seed }
     }
 
     fn next(&mut self) -> u64 {

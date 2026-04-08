@@ -1,3 +1,4 @@
+use crate::error::MlError;
 use wasm_bindgen::prelude::*;
 
 /// Type of moving average
@@ -262,10 +263,9 @@ pub fn momentum(data: &[f64], periods: usize) -> Vec<f64> {
 }
 
 /// Smooth data using exponential smoothing (single)
-#[wasm_bindgen(js_name = "exponentialSmoothing")]
-pub fn exponential_smoothing(data: &[f64], alpha: f64) -> Result<Vec<f64>, JsError> {
+pub fn exponential_smoothing_impl(data: &[f64], alpha: f64) -> Result<Vec<f64>, MlError> {
     if !(0.0..=1.0).contains(&alpha) {
-        return Err(JsError::new("Alpha must be between 0 and 1"));
+        return Err(MlError::new("Alpha must be between 0 and 1"));
     }
 
     if data.is_empty() {
@@ -281,6 +281,11 @@ pub fn exponential_smoothing(data: &[f64], alpha: f64) -> Result<Vec<f64>, JsErr
     }
 
     Ok(result)
+}
+
+#[wasm_bindgen(js_name = "exponentialSmoothing")]
+pub fn exponential_smoothing(data: &[f64], alpha: f64) -> Result<Vec<f64>, JsError> {
+    exponential_smoothing_impl(data, alpha).map_err(|e| JsError::new(&e.message))
 }
 
 /// Detect peaks in data (local maxima)
@@ -345,11 +350,10 @@ impl SeasonalDecomposition {
 }
 
 /// Decompose time series into trend + seasonal + residual (additive)
-#[wasm_bindgen(js_name = "seasonalDecompose")]
-pub fn seasonal_decompose(data: &[f64], period: usize) -> Result<SeasonalDecomposition, JsError> {
+pub fn seasonal_decompose_impl(data: &[f64], period: usize) -> Result<SeasonalDecomposition, MlError> {
     let n = data.len();
     if period < 2 || period >= n {
-        return Err(JsError::new("period must be >= 2 and < data length"));
+        return Err(MlError::new("period must be >= 2 and < data length"));
     }
 
     // Step 1: Trend = centered moving average
@@ -384,6 +388,11 @@ pub fn seasonal_decompose(data: &[f64], period: usize) -> Result<SeasonalDecompo
     }).collect();
 
     Ok(SeasonalDecomposition { trend, seasonal, residual, period })
+}
+
+#[wasm_bindgen(js_name = "seasonalDecompose")]
+pub fn seasonal_decompose(data: &[f64], period: usize) -> Result<SeasonalDecomposition, JsError> {
+    seasonal_decompose_impl(data, period).map_err(|e| JsError::new(&e.message))
 }
 
 /// Compute autocorrelation at each lag from 0 to max_lag

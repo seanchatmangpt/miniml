@@ -1,5 +1,5 @@
 {
-  "name": "micro-ml-benchmarks",
+  "name": "miniml-benchmarks",
   "private": true,
   "type": "module",
   "scripts": {
@@ -7,7 +7,7 @@
     "bench:compare": "node --experimental-wasm-modules compare.js"
   },
   "dependencies": {
-    "micro-ml": "workspace:*"
+    "miniml": "workspace:*"
   },
   "devDependencies": {
     "simple-statistics": "^7.8.0"

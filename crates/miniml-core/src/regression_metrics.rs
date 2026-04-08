@@ -1,10 +1,10 @@
+use crate::error::MlError;
 use wasm_bindgen::prelude::*;
 
 /// R² (Coefficient of Determination) - proportion of variance explained
-#[wasm_bindgen(js_name = "r2Score")]
-pub fn r2_score(y_true: &[f64], y_pred: &[f64]) -> Result<f64, JsError> {
+pub fn r2_score_impl(y_true: &[f64], y_pred: &[f64]) -> Result<f64, MlError> {
     if y_true.len() != y_pred.len() || y_true.is_empty() {
-        return Err(JsError::new("arrays must be same non-zero length"));
+        return Err(MlError::new("arrays must be same non-zero length"));
     }
 
     let n = y_true.len();
@@ -19,11 +19,15 @@ pub fn r2_score(y_true: &[f64], y_pred: &[f64]) -> Result<f64, JsError> {
     Ok(1.0 - ss_res / ss_tot)
 }
 
+#[wasm_bindgen(js_name = "r2Score")]
+pub fn r2_score(y_true: &[f64], y_pred: &[f64]) -> Result<f64, JsError> {
+    r2_score_impl(y_true, y_pred).map_err(|e| JsError::new(&e.message))
+}
+
 /// Mean Squared Error
-#[wasm_bindgen(js_name = "meanSquaredError")]
-pub fn mean_squared_error(y_true: &[f64], y_pred: &[f64]) -> Result<f64, JsError> {
+pub fn mean_squared_error_impl(y_true: &[f64], y_pred: &[f64]) -> Result<f64, MlError> {
     if y_true.len() != y_pred.len() || y_true.is_empty() {
-        return Err(JsError::new("arrays must be same non-zero length"));
+        return Err(MlError::new("arrays must be same non-zero length"));
     }
     let mse = y_true.iter().zip(y_pred.iter())
         .map(|(t, p)| (t - p).powi(2))
@@ -31,23 +35,36 @@ pub fn mean_squared_error(y_true: &[f64], y_pred: &[f64]) -> Result<f64, JsError
     Ok(mse)
 }
 
+#[wasm_bindgen(js_name = "meanSquaredError")]
+pub fn mean_squared_error(y_true: &[f64], y_pred: &[f64]) -> Result<f64, JsError> {
+    mean_squared_error_impl(y_true, y_pred).map_err(|e| JsError::new(&e.message))
+}
+
 /// Root Mean Squared Error
-#[wasm_bindgen(js_name = "rootMeanSquaredError")]
-pub fn root_mean_squared_error(y_true: &[f64], y_pred: &[f64]) -> Result<f64, JsError> {
-    let mse = mean_squared_error(y_true, y_pred)?;
+pub fn root_mean_squared_error_impl(y_true: &[f64], y_pred: &[f64]) -> Result<f64, MlError> {
+    let mse = mean_squared_error_impl(y_true, y_pred)?;
     Ok(mse.sqrt())
 }
 
+#[wasm_bindgen(js_name = "rootMeanSquaredError")]
+pub fn root_mean_squared_error(y_true: &[f64], y_pred: &[f64]) -> Result<f64, JsError> {
+    root_mean_squared_error_impl(y_true, y_pred).map_err(|e| JsError::new(&e.message))
+}
+
 /// Mean Absolute Error
-#[wasm_bindgen(js_name = "meanAbsoluteError")]
-pub fn mean_absolute_error(y_true: &[f64], y_pred: &[f64]) -> Result<f64, JsError> {
+pub fn mean_absolute_error_impl(y_true: &[f64], y_pred: &[f64]) -> Result<f64, MlError> {
     if y_true.len() != y_pred.len() || y_true.is_empty() {
-        return Err(JsError::new("arrays must be same non-zero length"));
+        return Err(MlError::new("arrays must be same non-zero length"));
     }
     let mae = y_true.iter().zip(y_pred.iter())
         .map(|(t, p)| (t - p).abs())
         .sum::<f64>() / y_true.len() as f64;
     Ok(mae)
+}
+
+#[wasm_bindgen(js_name = "meanAbsoluteError")]
+pub fn mean_absolute_error(y_true: &[f64], y_pred: &[f64]) -> Result<f64, JsError> {
+    mean_absolute_error_impl(y_true, y_pred).map_err(|e| JsError::new(&e.message))
 }
 
 /// Median Absolute Error (robust to outliers)
@@ -96,14 +113,14 @@ mod tests {
     fn test_r2_perfect() {
         let y_true = vec![1.0, 2.0, 3.0, 4.0];
         let y_pred = vec![1.0, 2.0, 3.0, 4.0];
-        assert!((r2_score(&y_true, &y_pred).unwrap() - 1.0).abs() < 1e-10);
+        assert!((r2_score_impl(&y_true, &y_pred).unwrap() - 1.0).abs() < 1e-10);
     }
 
     #[test]
     fn test_r2_half() {
         let y_true = vec![1.0, 2.0, 3.0, 4.0];
         let y_pred = vec![1.5, 1.5, 1.5, 1.5]; // Mean = 2.5, predictions are constant
-        let r2 = r2_score(&y_true, &y_pred).unwrap();
+        let r2 = r2_score_impl(&y_true, &y_pred).unwrap();
         assert!(r2 < 0.0); // Negative R² is possible
     }
 
@@ -111,7 +128,7 @@ mod tests {
     fn test_mse() {
         let y_true = vec![3.0, -0.5, 2.0, 7.0];
         let y_pred = vec![2.5, 0.0, 2.1, 7.8];
-        let mse = mean_squared_error(&y_true, &y_pred).unwrap();
+        let mse = mean_squared_error_impl(&y_true, &y_pred).unwrap();
         assert!(mse > 0.0);
     }
 
@@ -119,7 +136,7 @@ mod tests {
     fn test_mae() {
         let y_true = vec![3.0, -0.5, 2.0, 7.0];
         let y_pred = vec![2.5, 0.0, 2.1, 7.8];
-        let mae = mean_absolute_error(&y_true, &y_pred).unwrap();
+        let mae = mean_absolute_error_impl(&y_true, &y_pred).unwrap();
         assert!(mae > 0.0);
     }
 

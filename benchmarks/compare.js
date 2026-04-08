@@ -1,10 +1,10 @@
 /**
- * Comparison benchmarks: micro-ml vs popular JS alternatives
+ * Comparison benchmarks: miniml vs popular JS alternatives
  *
  * Run with: node --experimental-wasm-modules compare.js
  */
 
-import { linearRegression as wasmLinear, sma as wasmSma } from 'micro-ml';
+import { linearRegression as wasmLinear, sma as wasmSma } from 'miniml';
 import ss from 'simple-statistics';
 
 // Generate test data
@@ -59,7 +59,7 @@ function printComparison(results) {
 }
 
 async function main() {
-  console.log('📊 Micro-ML vs Alternatives Comparison\n');
+  console.log('📊 miniml vs Alternatives Comparison\n');
   console.log('Comparing against simple-statistics (pure JS)\n');
 
   const sizes = [1000, 10000, 50000];
@@ -75,7 +75,7 @@ async function main() {
     // Linear Regression
     console.log('\n📈 Linear Regression:');
 
-    results.push(await benchmark('micro-ml (WASM)', () => wasmLinear(x, y)));
+    results.push(await benchmark('miniml (WASM)', () => wasmLinear(x, y)));
     results.push(
       await benchmark('simple-statistics', () => ss.linearRegression(points))
     );
@@ -88,7 +88,7 @@ async function main() {
     const speedup = ssTime / wasmTime;
 
     console.log(
-      `\n  ⚡ micro-ml is ${speedup.toFixed(1)}x ${speedup > 1 ? 'faster' : 'slower'} than simple-statistics`
+      `\n  ⚡ miniml is ${speedup.toFixed(1)}x ${speedup > 1 ? 'faster' : 'slower'} than simple-statistics`
     );
 
     // R-squared comparison (accuracy check)
@@ -96,9 +96,9 @@ async function main() {
     const ssModel = ss.linearRegression(points);
 
     console.log('\n  📐 Accuracy comparison:');
-    console.log(`     micro-ml slope:     ${wasmModel.slope.toFixed(6)}`);
+    console.log(`     miniml slope:     ${wasmModel.slope.toFixed(6)}`);
     console.log(`     simple-stats slope: ${ssModel.m.toFixed(6)}`);
-    console.log(`     micro-ml R²:        ${wasmModel.rSquared.toFixed(6)}`);
+    console.log(`     miniml R²:        ${wasmModel.rSquared.toFixed(6)}`);
   }
 
   // Memory usage estimate
@@ -106,7 +106,7 @@ async function main() {
   console.log('┌───────────────────────┬─────────────┐');
   console.log('│ Library               │ Size (gzip) │');
   console.log('├───────────────────────┼─────────────┤');
-  console.log('│ micro-ml              │ ~15-20 KB   │');
+  console.log('│ miniml                │ ~15-20 KB   │');
   console.log('│ simple-statistics     │ ~30 KB      │');
   console.log('│ TensorFlow.js         │ ~500+ KB    │');
   console.log('│ ml.js                 │ ~150 KB     │');

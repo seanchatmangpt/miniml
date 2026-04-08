@@ -550,7 +550,8 @@ mod tests {
             serde_json::json!({"weights": vec![0.5, 1.5, -0.3]}),
         );
 
-        let onnx_bytes = export_onnx(&model).unwrap();
+        let model_js = serde_wasm_bindgen::to_value(&model).unwrap();
+        let onnx_bytes = export_onnx(model_js).unwrap();
         assert!(!onnx_bytes.is_empty());
 
         let imported = import_onnx(&onnx_bytes);

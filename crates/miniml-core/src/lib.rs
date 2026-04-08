@@ -37,7 +37,7 @@ mod linear_regression;
 mod kmeans_plus;
 mod imputer;
 mod automl;
-mod optimization;
+pub mod optimization;
 mod persistence;
 mod explainability;
 mod dataframe;
@@ -47,6 +47,20 @@ mod transfer;
 mod augmentation;
 mod stacking;
 mod advanced_cv;
+mod monte_carlo;
+mod markov;
+mod distributions;
+mod stats;
+mod elastic_net;
+mod svr;
+mod quantile_regression;
+mod kernel;
+mod bayesian;
+mod gaussian_process;
+mod association;
+mod survival;
+mod recommendation;
+mod graph;
 
 use wasm_bindgen::prelude::*;
 pub use error::MlError;
@@ -54,7 +68,6 @@ pub use error::MlError;
 #[wasm_bindgen(start)]
 pub fn init() {}
 
-// Re-export all public types and functions
 pub use linear::*;
 pub use polynomial::*;
 pub use exponential::*;
@@ -101,3 +114,17 @@ pub use transfer::*;
 pub use augmentation::*;
 pub use stacking::*;
 pub use advanced_cv::*;
+pub use monte_carlo::*;
+pub use markov::*;
+pub use distributions::*;
+pub use stats::*;
+pub use elastic_net::*;
+pub use svr::*;
+pub use quantile_regression::*;
+pub use kernel::*;
+pub use bayesian::*;
+pub use gaussian_process::*;
+pub use association::*;
+pub use survival::*;
+pub use recommendation::*;
+pub use graph::*;

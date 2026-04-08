@@ -1,7 +1,7 @@
 {
-  "name": "micro-ml",
-  "version": "1.0.0",
-  "description": "8 ML algorithms + statistics in ~56KB gzipped. Rust/WASM, zero dependencies, browser + Node.",
+  "name": "miniml",
+  "version": "26.4.8",
+  "description": "70+ ML algorithms across 15 families with AutoML, SIMD acceleration, and zero dependencies. Rust/WASM, browser + Node.",
   "type": "module",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
@@ -21,38 +21,69 @@
   ],
   "scripts": {
     "build": "tsup && cp wasm/miniml_core_bg.wasm dist/",
-    "build:wasm": "cd ../../crates/micro-ml-core && wasm-pack build --target web --out-dir ../../packages/micro-ml/wasm",
+    "build:wasm": "cd ../../crates/miniml-core && wasm-pack build --target web --out-dir ../../packages/miniml/wasm",
     "test": "vitest run",
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
-    "clean": "rm -rf dist wasm"
+    "clean": "rm -rf dist wasm",
+    "prepublishOnly": "pnpm build && pnpm test && pnpm typecheck"
   },
   "keywords": [
     "machine-learning",
-    "regression",
-    "classification",
-    "clustering",
+    "automl",
     "wasm",
     "webassembly",
-    "kmeans",
-    "knn",
-    "decision-tree",
-    "pca",
-    "logistic-regression",
-    "naive-bayes",
-    "dbscan",
+    "classification",
+    "regression",
+    "clustering",
+    "preprocessing",
     "time-series",
-    "tiny"
+    "knn",
+    "random-forest",
+    "gradient-boosting",
+    "decision-tree",
+    "svm",
+    "naive-bayes",
+    "logistic-regression",
+    "kmeans",
+    "dbscan",
+    "pca",
+    "monte-carlo",
+    "markov-chain",
+    "hmm",
+    "mcmc",
+    "bayesian",
+    "gaussian-process",
+    "survival-analysis",
+    "kernel-methods",
+    "graph-algorithms",
+    "recommendation",
+    "association-rules",
+    "statistical-inference",
+    "hypothesis-testing",
+    "anomaly-detection",
+    "drift-detection",
+    "genetic-algorithm",
+    "pso",
+    "simulated-annealing",
+    "simd"
   ],
-  "author": "Adam Perliński",
-  "license": "MIT",
+  "author": "Sean Chatman",
+  "license": "BSL-1.1",
   "repository": {
     "type": "git",
-    "url": "https://github.com/AdamPerlinski/micro-ml"
+    "url": "https://github.com/seanchatmangpt/miniml"
   },
-  "homepage": "https://github.com/AdamPerlinski/micro-ml#readme",
+  "homepage": "https://github.com/seanchatmangpt/miniml#readme",
   "bugs": {
-    "url": "https://github.com/AdamPerlinski/micro-ml/issues"
+    "url": "https://github.com/seanchatmangpt/miniml/issues"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "funding": {
+    "type": "github",
+    "url": "https://github.com/sponsors/seanchatmangpt"
   },
   "devDependencies": {
     "@types/node": "^25.2.1",

@@ -1,11 +1,11 @@
+use crate::error::MlError;
 use wasm_bindgen::prelude::*;
 
 /// Matthews Correlation Coefficient (MCC) - balanced measure for binary classification
 /// Range: [-1, 1], where 1 = perfect, 0 = random, -1 = inverse
-#[wasm_bindgen(js_name = "matthewsCorrcoef")]
-pub fn matthews_corrcoef(y_true: &[f64], y_pred: &[f64]) -> Result<f64, JsError> {
+pub fn matthews_corrcoef_impl(y_true: &[f64], y_pred: &[f64]) -> Result<f64, MlError> {
     if y_true.len() != y_pred.len() || y_true.is_empty() {
-        return Err(JsError::new("arrays must be same non-zero length"));
+        return Err(MlError::new("arrays must be same non-zero length"));
     }
 
     let mut tp = 0usize;
@@ -36,12 +36,16 @@ pub fn matthews_corrcoef(y_true: &[f64], y_pred: &[f64]) -> Result<f64, JsError>
     Ok(numerator / denominator.sqrt())
 }
 
+#[wasm_bindgen(js_name = "matthewsCorrcoef")]
+pub fn matthews_corrcoef(y_true: &[f64], y_pred: &[f64]) -> Result<f64, JsError> {
+    matthews_corrcoef_impl(y_true, y_pred).map_err(|e| JsError::new(&e.message))
+}
+
 /// Cohen's Kappa - agreement measure accounting for chance
 /// Range: [-1, 1], where 1 = perfect agreement, 0 = chance agreement
-#[wasm_bindgen(js_name = "cohensKappa")]
-pub fn cohens_kappa(y_true: &[f64], y_pred: &[f64]) -> Result<f64, JsError> {
+pub fn cohens_kappa_impl(y_true: &[f64], y_pred: &[f64]) -> Result<f64, MlError> {
     if y_true.len() != y_pred.len() || y_true.is_empty() {
-        return Err(JsError::new("arrays must be same non-zero length"));
+        return Err(MlError::new("arrays must be same non-zero length"));
     }
 
     let n = y_true.len();
@@ -90,11 +94,15 @@ pub fn cohens_kappa(y_true: &[f64], y_pred: &[f64]) -> Result<f64, JsError> {
     Ok((po - pe) / (1.0 - pe))
 }
 
+#[wasm_bindgen(js_name = "cohensKappa")]
+pub fn cohens_kappa(y_true: &[f64], y_pred: &[f64]) -> Result<f64, JsError> {
+    cohens_kappa_impl(y_true, y_pred).map_err(|e| JsError::new(&e.message))
+}
+
 /// Balanced Accuracy - average of recall per class
-#[wasm_bindgen(js_name = "balancedAccuracy")]
-pub fn balanced_accuracy(y_true: &[f64], y_pred: &[f64]) -> Result<f64, JsError> {
+pub fn balanced_accuracy_impl(y_true: &[f64], y_pred: &[f64]) -> Result<f64, MlError> {
     if y_true.len() != y_pred.len() || y_true.is_empty() {
-        return Err(JsError::new("arrays must be same non-zero length"));
+        return Err(MlError::new("arrays must be same non-zero length"));
     }
 
     let mut unique_true: Vec<f64> = y_true.to_vec();
@@ -132,6 +140,11 @@ pub fn balanced_accuracy(y_true: &[f64], y_pred: &[f64]) -> Result<f64, JsError>
     Ok(sum / recalls.len() as f64)
 }
 
+#[wasm_bindgen(js_name = "balancedAccuracy")]
+pub fn balanced_accuracy(y_true: &[f64], y_pred: &[f64]) -> Result<f64, JsError> {
+    balanced_accuracy_impl(y_true, y_pred).map_err(|e| JsError::new(&e.message))
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -140,7 +153,7 @@ mod tests {
     fn test_mcc_perfect() {
         let y_true = vec![0.0, 0.0, 1.0, 1.0];
         let y_pred = vec![0.0, 0.0, 1.0, 1.0];
-        let mcc = matthews_corrcoef(&y_true, &y_pred).unwrap();
+        let mcc = matthews_corrcoef_impl(&y_true, &y_pred).unwrap();
         assert!((mcc - 1.0).abs() < 1e-10);
     }
 
@@ -148,7 +161,7 @@ mod tests {
     fn test_mcc_worst() {
         let y_true = vec![0.0, 0.0, 1.0, 1.0];
         let y_pred = vec![1.0, 1.0, 0.0, 0.0];
-        let mcc = matthews_corrcoef(&y_true, &y_pred).unwrap();
+        let mcc = matthews_corrcoef_impl(&y_true, &y_pred).unwrap();
         assert!((mcc - (-1.0)).abs() < 1e-10);
     }
 
@@ -156,7 +169,7 @@ mod tests {
     fn test_cohen_kappa_perfect() {
         let y_true = vec![0.0, 1.0, 0.0, 1.0];
         let y_pred = vec![0.0, 1.0, 0.0, 1.0];
-        let kappa = cohens_kappa(&y_true, &y_pred).unwrap();
+        let kappa = cohens_kappa_impl(&y_true, &y_pred).unwrap();
         assert!((kappa - 1.0).abs() < 1e-10);
     }
 
@@ -165,7 +178,7 @@ mod tests {
         let y_true = vec![0.0, 0.0, 0.0, 1.0, 1.0, 1.0];
         let y_pred = vec![0.0, 0.0, 1.0, 1.0, 1.0, 0.0];
         // Class 0: 2/3 correct, Class 1: 2/3 correct
-        let ba = balanced_accuracy(&y_true, &y_pred).unwrap();
+        let ba = balanced_accuracy_impl(&y_true, &y_pred).unwrap();
         assert!((ba - 2.0/3.0).abs() < 1e-10);
     }
 }

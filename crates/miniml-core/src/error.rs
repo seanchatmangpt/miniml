@@ -1,6 +1,6 @@
 use std::fmt;
 
-/// Internal error type for micro-ml operations
+/// Internal error type for miniml operations
 #[derive(Debug, Clone)]
 pub struct MlError {
     pub message: String,

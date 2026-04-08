@@ -1,6 +1,6 @@
 # Algorithm Reference
 
-Complete reference for all 30+ algorithms in miniml.
+Complete reference for all 70+ algorithms in miniml across 15 families.
 
 ## Classification Algorithms
 
@@ -302,6 +302,34 @@ const prediction = result.predict(testPoint);
 
 ---
 
+### Lasso Regression
+
+L1-regularized linear regression via coordinate descent.
+
+```js
+import { lassoRegression } from 'miniml';
+
+const result = await lassoRegression(X, y, alpha, l1Ratio, maxIterations, tol, nSamples, nFeatures);
+const prediction = result.predict(testPoint);
+```
+
+**Parameters:**
+- `X`: Training features
+- `y`: Target values
+- `alpha`: Regularization strength
+- `l1Ratio`: L1 penalty ratio (0=Ridge, 1=Lasso)
+- `maxIterations`: Maximum iterations
+- `tol`: Convergence tolerance
+
+**Best for:**
+- Sparse models
+- Feature selection via regularization
+- High-dimensional data
+
+**Time Complexity:** O(maxIterations × n × nFeatures) training
+
+---
+
 ### Polynomial Regression
 
 Nonlinear regression with polynomial features.
@@ -399,6 +427,84 @@ const prediction = result.predict(testPoint);
 - Physical/natural phenomena
 
 **Time Complexity:** O(n) training
+
+---
+
+### SVR (Support Vector Regression)
+
+Epsilon-SVR via PEGASOS-style subgradient descent.
+
+```js
+import { svrFit } from 'miniml';
+
+const model = await svrFit(X, y, nFeatures, targets, epsilon, c, maxIterations, learningRate, seed);
+const prediction = await model.predict(testPoint);
+```
+
+**Parameters:**
+- `X`: Training features
+- `y`: Target values
+- `epsilon`: Epsilon tube width
+- `c`: Regularization parameter
+- `maxIterations`: Maximum iterations
+- `learningRate`: Learning rate
+
+**Best for:**
+- Nonlinear regression
+- Robust to outliers
+- High-dimensional data
+
+---
+
+### Quantile Regression
+
+Predicts conditional quantiles via pinball loss + IRLS.
+
+```js
+import { quantileRegressionFit } from 'miniml';
+
+const model = await quantileRegressionFit(X, y, nFeatures, targets, quantile, maxIterations, learningRate, tol);
+const prediction = await model.predict(testPoint);
+```
+
+**Parameters:**
+- `X`: Training features
+- `y`: Target values
+- `quantile`: Quantile to predict (0-1)
+- `maxIterations`: Maximum iterations
+- `learningRate`: Learning rate
+- `tol`: Convergence tolerance
+
+**Best for:**
+- Prediction intervals
+- Robust regression
+- Heteroscedastic data
+
+---
+
+### Elastic Net
+
+Coordinate descent with combined L1+L2 penalty.
+
+```js
+import { elasticNet } from 'miniml';
+
+const model = await elasticNet(X, y, nFeatures, targets, alpha, l1Ratio, maxIterations, tol);
+const prediction = await model.predict(testPoint);
+```
+
+**Parameters:**
+- `X`: Training features
+- `y`: Target values
+- `alpha`: Overall regularization strength
+- `l1Ratio`: L1/L2 mix (0=Ridge, 1=Lasso)
+- `maxIterations`: Maximum iterations
+- `tol`: Convergence tolerance
+
+**Best for:**
+- Sparse models with grouped features
+- High-dimensional data
+- Feature selection with correlation
 
 ---
 
@@ -507,238 +613,573 @@ const labels = await hierarchicalClustering(X, nFeatures, nClusters);
 
 ---
 
-## Preprocessing Algorithms
+## Probabilistic Methods
 
-### Standard Scaler
+### Monte Carlo Integration
 
-Z-score normalization: (x - mean) / std
-
-```js
-import { standardScaler } from 'miniml';
-
-const scaled = await standardScaler(X, nSamples, nFeatures);
-```
-
-**Best for:**
-- Gaussian-distributed features
-- Algorithms sensitive to feature scale (SVM, KNN)
-- When zero-mean is desired
-
----
-
-### MinMax Scaler
-
-Scale to [0, 1] range: (x - min) / (max - min)
+Numerical integration via random sampling.
 
 ```js
-import { minMaxScaler } from 'miniml';
+import { mcIntegrate } from 'miniml';
 
-const scaled = await minMaxScaler(X, nSamples, nFeatures);
-```
-
-**Best for:**
-- Neural networks
-- When preserving zero entries is important
-- Bounded value requirements
-
----
-
-### Robust Scaler
-
-Scale using quartiles: (x - median) / IQR
-
-```js
-import { robustScaler } from 'miniml';
-
-const scaled = await robustScaler(X, nSamples, nFeatures);
-```
-
-**Best for:**
-- Data with outliers
-- Non-Gaussian distributions
-- When median-based scaling is preferred
-
----
-
-### Normalizer
-
-L2 normalization per sample: x / ||x||₂
-
-```js
-import { normalizer } from 'miniml';
-
-const normalized = await normalizer(X, nSamples, nFeatures);
-```
-
-**Best for:**
-- Text data (TF-IDF)
-- Cosine similarity calculations
-- When magnitude should be ignored
-
----
-
-### Label Encoder
-
-Convert text labels to numeric values.
-
-```js
-import { labelEncoder } from 'miniml';
-
-const encoded = await labelEncoder(y);
-```
-
-**Best for:**
-- Converting string labels to integers
-- Preparing labels for ML algorithms
-
----
-
-### One-Hot Encoder
-
-Binary encoding for categorical features.
-
-```js
-import { oneHotEncoder } from 'miniml';
-
-const oneHot = await oneHotEncoder(y, nClasses);
-```
-
-**Best for:**
-- Nominal categorical data
-- When no ordinal relationship exists
-- Neural network inputs
-
----
-
-## Dimensionality Reduction
-
-### PCA
-
-Principal component analysis for variance maximization.
-
-```js
-import { pca } from 'miniml';
-
-const result = await pca(X, nSamples, nFeatures, nComponents);
-const transformed = result.getTransformed();
-const explainedVariance = result.getExplainedVarianceRatio();
+const integral = await mcIntegrate(fn, a, b, n, seed);
 ```
 
 **Parameters:**
-- `X`: Data points
-- `nSamples`: Number of samples
-- `nFeatures`: Original number of features
-- `nComponents`: Number of principal components
+- `fn`: Function to integrate (takes f64, returns f64)
+- `a`: Lower bound
+- `b`: Upper bound
+- `n`: Number of samples
+- `seed`: Random seed
 
 **Best for:**
-- Visualization (2-3 components)
-- Noise reduction
-- Feature extraction
+- High-dimensional integrals
+- Complex integrands
+- When analytical solutions unavailable
 
-**Time Complexity:** O(n × nFeatures² + nFeatures³)
-
----
-
-## Metrics & Evaluation
-
-### Confusion Matrix
-
-```js
-import { confusionMatrix } from 'miniml';
-
-const cm = await confusionMatrix(yTrue, yPred);
-// Returns: [[TP, FP], [FN, TN]]
-```
-
-### Classification Report
-
-```js
-import { classificationReport } from 'miniml';
-
-const report = await classificationReport(yTrue, yPred);
-// Returns: precision, recall, f1-score per class
-```
-
-### Silhouette Score
-
-```js
-import { silhouetteScore } from 'miniml';
-
-const score = await silhouetteScore(X, labels, nSamples, nFeatures);
-// Range: [-1, 1], higher is better
-```
-
-### ROC AUC
-
-```js
-import { rocAucScore } from 'miniml';
-
-const auc = await rocAucScore(yTrue, yProbabilities);
-// Range: [0, 1], higher is better
-```
-
-### R² Score
-
-```js
-import { r2Score } from 'miniml';
-
-const r2 = await r2Score(yTrue, yPred);
-// Range: (-∞, 1], higher is better
-```
-
-### RMSE
-
-```js
-import { rmse } from 'miniml';
-
-const error = await rmse(yTrue, yPred);
-// Lower is better
-```
-
-### MAE
-
-```js
-import { mae } from 'miniml';
-
-const error = await mae(yTrue, yPred);
-// Lower is better
-```
+**Time Complexity:** O(n)
 
 ---
 
-## Time Series Algorithms
+### Monte Carlo Bootstrap
 
-### Simple Moving Average (SMA)
-
-```js
-import { sma } from 'miniml';
-
-const smoothed = await sma(data, window);
-```
-
-### Exponential Moving Average (EMA)
+Bootstrap confidence intervals via resampling.
 
 ```js
-import { ema } from 'miniml';
+import { mcBootstrap } from 'miniml';
 
-const smoothed = await ema(data, span);
+const ci = await mcBootstrap(data, nBootstrap, statistic, confidence, seed);
 ```
 
-### Peak Detection
+**Parameters:**
+- `data`: Sample data
+- `nBootstrap`: Number of bootstrap iterations
+- `statistic`: Statistic to compute ('mean', 'median', etc.)
+- `confidence`: Confidence level (0-1)
+- `seed`: Random seed
+
+**Best for:**
+- Confidence interval estimation
+- Small sample inference
+- Nonparametric statistics
+
+**Time Complexity:** O(nBootstrap × n)
+
+---
+
+### Markov Chain Steady State
+
+Compute steady-state distribution of discrete Markov chain.
 
 ```js
-import { peakDetection } from 'miniml';
+import { computeSteadyState } from 'miniml';
 
-const peaks = await peakDetection(data, distance, threshold);
+const steadyState = await computeSteadyState(transitionMatrix, nStates);
 ```
 
-### Trough Detection
+**Parameters:**
+- `transitionMatrix`: Row-stochastic transition matrix
+- `nStates`: Number of states
+
+**Best for:**
+- Long-term behavior analysis
+- Equilibrium distributions
+- PageRank-style algorithms
+
+**Time Complexity:** O(nStates³)
+
+---
+
+### Hidden Markov Models (HMM)
+
+Forward, Viterbi, backward algorithms + Baum-Welch training.
 
 ```js
-import { troughDetection } from 'miniml';
+import {
+  hmmForward,
+  hmmViterbi,
+  hmmBackward,
+  hmmTrainBaumWelch
+} from 'miniml';
 
-const troughs = await troughDetection(data, distance, threshold);
+// Forward algorithm (likelihood)
+const alpha = await hmmForward(initial, transition, emission, obs, nStates, nObs);
+
+// Viterbi decoding (most likely state sequence)
+const path = await hmmViterbi(initial, transition, emission, obs, nStates, nObs);
+
+// Backward algorithm
+const beta = await hmmBackward(initial, transition, emission, obs, nStates, nObs);
+
+// Baum-Welch training (EM)
+const model = await hmmTrainBaumWelch(obs, nStates, nObsSymbols, maxIterations, tol, seed);
 ```
+
+**Best for:**
+- Sequential data modeling
+- Speech recognition
+- Bioinformatics (sequence alignment)
+- Financial time series
+
+---
+
+### MCMC (Metropolis-Hastings)
+
+Bayesian sampling via Markov Chain Monte Carlo.
+
+```js
+import { metropolisHastings } from 'miniml';
+
+const samples = await metropolisHastings(logTargetFn, proposalSd, nSamples, burnIn, seed, initial);
+```
+
+**Parameters:**
+- `logTargetFn`: Log of target distribution (closure or function)
+- `proposalSd`: Proposal distribution standard deviation
+- `nSamples`: Number of samples to draw
+- `burnIn`: Burn-in period
+- `seed`: Random seed
+- `initial`: Initial value
+
+**Best for:**
+- Bayesian inference
+- Complex posterior distributions
+- When analytical solutions unavailable
+
+---
+
+## Statistical Distributions
+
+### Normal Distribution
+
+PDF, CDF, quantile (PPF), and sampling for normal distribution.
+
+```js
+import {
+  normalPdf,
+  normalCdf,
+  normalPpf,
+  normalSample
+} from 'miniml';
+
+const pdf = normalPdf(x, mean, std);
+const cdf = normalCdf(x, mean, std);
+const quantile = normalPpf(p, mean, std);
+const sample = normalSample(n, mean, std, seed);
+```
+
+---
+
+### Binomial Distribution
+
+PMF, CDF, and sampling for binomial distribution.
+
+```js
+import {
+  binomialPmf,
+  binomialCdf,
+  binomialSample
+} from 'miniml';
+```
+
+---
+
+### Poisson Distribution
+
+PMF, CDF, and sampling for Poisson distribution.
+
+```js
+import {
+  poissonPmf,
+  poissonCdf,
+  poissonSample
+} from 'miniml';
+```
+
+---
+
+### Exponential Distribution
+
+PDF, CDF, and sampling for exponential distribution.
+
+```js
+import {
+  exponentialPdf,
+  exponentialCdf,
+  exponentialSample
+} from 'miniml';
+```
+
+---
+
+## Statistical Inference
+
+### t-Tests
+
+One-sample, two-sample, paired, and Welch's t-test.
+
+```js
+import {
+  tTestOneSample,
+  tTestTwoSample,
+  tTestPaired,
+  welchTTest
+} from 'miniml';
+
+const t = await tTestOneSample(data, nullHypothesis, alpha);
+const t = await tTestTwoSample(data1, data2, alpha);
+const t = await tTestPaired(data1, data2, alpha);
+const t = await welchTTest(data1, data2, alpha);
+```
+
+**Best for:**
+- Comparing means
+- Small sample inference
+- Normally distributed data
+
+---
+
+### Nonparametric Tests
+
+Mann-Whitney U and Wilcoxon signed-rank tests.
+
+```js
+import {
+  mannWhitneyU,
+  wilcoxonSignedRank
+} from 'miniml';
+
+const u = await mannWhitneyU(data1, data2);
+const w = await wilcoxonSignedRank(data1, data2);
+```
+
+**Best for:**
+- Ordinal data
+- Non-normal distributions
+- Robust alternatives to t-tests
+
+---
+
+### Chi-Square Tests
+
+Goodness of fit and independence tests.
+
+```js
+import {
+  chiSquareTest,
+  chiSquareIndependence
+} from 'miniml';
+
+const chi2 = await chiSquareTest(observed, expected);
+const chi2 = await chiSquareIndependence(contingencyTable);
+```
+
+**Best for:**
+- Categorical data analysis
+- Test of independence
+- Goodness of fit testing
+
+---
+
+### ANOVA
+
+One-way analysis of variance.
+
+```js
+import { oneWayAnova } from 'miniml';
+
+const f = await oneWayAnova(groups, groupSizes);
+```
+
+**Best for:**
+- Comparing multiple group means
+- Variance decomposition
+- Experimental design analysis
+
+---
+
+## Kernel Methods
+
+### RBF Kernel
+
+Radial basis function kernel for similarity computation.
+
+```js
+import { rbfKernel, rbfKernelMatrix } from 'miniml';
+
+const k = await rbfKernel(x, y, gamma);
+const K = await rbfKernelMatrix(data, nSamples, nFeatures, gamma);
+```
+
+**Parameters:**
+- `gamma`: Kernel width parameter (default: 1/nFeatures)
+
+**Best for:**
+- SVM kernel trick
+- Gaussian processes
+- Local similarity
+
+---
+
+### Polynomial Kernel
+
+Polynomial kernel matrix.
+
+```js
+import { polynomialKernel, polynomialKernelMatrix } from 'miniml';
+
+const k = await polynomialKernel(x, y, degree, coef0);
+const K = await polynomialKernelMatrix(data, nSamples, nFeatures, degree, gamma, coef0);
+```
+
+**Best for:**
+- Capturing feature interactions
+- Polynomial decision boundaries
+- Explicit feature maps
+
+---
+
+### Sigmoid Kernel
+
+Hyperbolic tangent kernel.
+
+```js
+import { sigmoidKernel, sigmoidKernelMatrix } from 'miniml';
+
+const k = await sigmoidKernel(x, y, gamma, coef0);
+const K = await sigmoidKernelMatrix(data, nSamples, nFeatures, gamma, coef0);
+```
+
+**Best for:**
+- Neural network-like similarity
+- Bounded similarity measure
+
+---
+
+## Bayesian Methods
+
+### Bayesian Estimation
+
+MCMC-based parameter estimation.
+
+```js
+import { bayesianEstimate } from 'miniml';
+
+const samples = await bayesianEstimate(logLikelihood, logPrior, nSamples, burnIn, seed, initial, proposalSd);
+```
+
+**Best for:**
+- Parameter uncertainty quantification
+- Prior knowledge incorporation
+- Complex posteriors
+
+---
+
+### Bayesian Linear Regression
+
+Conjugate prior linear regression.
+
+```js
+import { bayesianLinearRegression } from 'miniml';
+
+const model = await bayesianLinearRegression(data, nFeatures, targets, priorPrecision, priorAlpha, priorBeta);
+```
+
+**Best for:**
+- Uncertainty in regression coefficients
+- Small data problems
+- Prior information available
+
+---
+
+## Gaussian Processes
+
+### GP Fit
+
+Cholesky-based Gaussian process regression.
+
+```js
+import { gpFit } from 'miniml';
+
+const model = await gpFit(data, nFeatures, targets, kernelType, kernelParams, noise);
+```
+
+**Parameters:**
+- `kernelType`: 'rbf', 'polynomial', or 'sigmoid'
+- `kernelParams`: Kernel hyperparameters
+- `noise`: Observation noise variance
+
+**Best for:**
+- Small datasets
+- Uncertainty quantification
+- Nonparametric regression
+
+---
+
+### GP Predict
+
+Prediction with uncertainty intervals.
+
+```js
+import { gpPredict } from 'miniml';
+
+const pred = await gpPredict(model, xTest, nFeatures);
+// { mean: [...], std: [...], lower: [...], upper: [...] }
+```
+
+---
+
+## Survival Analysis
+
+### Kaplan-Meier Estimator
+
+Survival curve estimation with confidence intervals.
+
+```js
+import { kaplanMeier } from 'miniml';
+
+const km = await kaplanMeier(times, events);
+```
+
+**Parameters:**
+- `times`: Event/censoring times
+- `events`: 1 for event, 0 for censored
+
+**Best for:**
+- Patient survival analysis
+- Reliability engineering
+- Time-to-event modeling
+
+---
+
+### Cox Proportional Hazards
+
+Hazard ratio modeling via partial likelihood.
+
+```js
+import { coxProportionalHazards } from 'miniml';
+
+const cox = await coxProportionalHazards(features, nFeatures, times, events, maxIterations, learningRate);
+```
+
+**Best for:**
+- Survival factor analysis
+- Treatment effect estimation
+- Risk prediction
+
+---
+
+## Association Rules
+
+### Apriori Algorithm
+
+Frequent itemset mining and association rule discovery.
+
+```js
+import { apriori } from 'miniml';
+
+const rules = await apriori(transactions, transactionLengths, minSupport, minConfidence);
+```
+
+**Parameters:**
+- `transactions`: Flattened transaction array
+- `transactionLengths`: Length of each transaction
+- `minSupport`: Minimum support threshold
+- `minConfidence`: Minimum confidence threshold
+
+**Best for:**
+- Market basket analysis
+- Recommendation systems
+- Pattern discovery
+
+---
+
+## Recommendation Systems
+
+### Matrix Factorization
+
+Collaborative filtering via SGD.
+
+```js
+import { matrixFactorization } from 'miniml';
+
+const model = await matrixFactorization(ratings, nUsers, nItems, nFactors, maxIterations, learningRate, regularization, seed);
+```
+
+**Best for:**
+- Rating prediction
+- Collaborative filtering
+- Latent factor discovery
+
+---
+
+### User-User Collaborative Filtering
+
+k-NN based collaborative filtering.
+
+```js
+import { userUserCollaborative } from 'miniml';
+
+const predictions = await userUserCollaborative(ratings, nUsers, nItems, userId, k);
+```
+
+**Best for:**
+- User-based recommendations
+- Similar user discovery
+- Neighborhood methods
+
+---
+
+## Graph Algorithms
+
+### PageRank
+
+Link analysis ranking algorithm.
+
+```js
+import { pagerank } from 'miniml';
+
+const ranks = await pagerank(adjacency, nNodes, damping, maxIterations, tol);
+```
+
+**Best for:**
+- Web page ranking
+- Citation network analysis
+- Importance scoring
+
+---
+
+### Shortest Path
+
+Dijkstra's algorithm for shortest paths.
+
+```js
+import { shortestPath } from 'miniml';
+
+const distances = await shortestPath(adjacency, nNodes, source);
+```
+
+**Best for:**
+- Route planning
+- Network analysis
+- Minimum distance computation
+
+---
+
+### Community Detection
+
+Label propagation for community discovery.
+
+```js
+import { communityDetection } from 'miniml';
+
+const labels = await communityDetection(adjacency, nNodes);
+```
+
+**Best for:**
+- Social network analysis
+- Graph partitioning
+- Cluster discovery in networks
 
 ---
 
@@ -753,4 +1194,8 @@ const troughs = await troughDetection(data, distance, threshold);
 | Time Series | Any | Low | SMA, EMA, Peak Detection |
 | Clustering | Any | Any | K-Means++, DBSCAN, Hierarchical |
 | Regression | Small | Low | Linear, Polynomial Regression |
-| Regression | Large | High | Ridge Regression |
+| Regression | Large | High | Ridge Regression, Elastic Net |
+| Probabilistic | Any | Any | Monte Carlo, HMM, MCMC |
+| Statistical | Any | Any | t-tests, ANOVA, Chi-square |
+| Survival | Any | Any | Kaplan-Meier, Cox PH |
+| Graph | Any | Any | PageRank, Community Detection |

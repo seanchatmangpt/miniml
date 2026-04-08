@@ -80,14 +80,13 @@ impl CausalEffect {
 /// * `outcome` - Outcome variable
 /// * `n_samples` - Number of samples
 /// * `n_features` - Number of covariate features
-#[wasm_bindgen]
-pub fn propensity_score_matching(
+pub fn propensity_score_matching_impl(
     treatment: &[f64],
     covariates: &[f64],
     outcome: &[f64],
     n_samples: usize,
     n_features: usize,
-) -> Result<CausalEffect, JsError> {
+) -> Result<CausalEffect, MlError> {
     // Separate treated and control groups
     let mut treated_indices = Vec::new();
     let mut control_indices = Vec::new();
@@ -104,7 +103,7 @@ pub fn propensity_score_matching(
     let n_control = control_indices.len();
 
     if n_treated == 0 || n_control == 0 {
-        return Err(JsError::new("Need both treated and control units"));
+        return Err(MlError::new("Need both treated and control units"));
     }
 
     // Compute propensity scores using logistic regression
@@ -120,7 +119,7 @@ pub fn propensity_score_matching(
         let treated_outcome = outcome[treated_idx];
 
         // Find best matching control (not yet used)
-        let mut best_match_idx = None;
+        let mut best_match_pos = None;
         let mut best_distance = f64::INFINITY;
 
         for (control_pos, &control_used) in used_controls.iter().enumerate() {
@@ -147,18 +146,19 @@ pub fn propensity_score_matching(
 
             if total_distance < best_distance {
                 best_distance = total_distance;
-                best_match_idx = Some(control_idx);
+                best_match_pos = Some(control_pos);
             }
         }
 
-        if let Some(match_idx) = best_match_idx {
-            matched_pairs.push((treated_idx, match_idx));
-            used_controls[match_idx] = true;
+        if let Some(control_pos) = best_match_pos {
+            let control_idx = control_indices[control_pos];
+            matched_pairs.push((treated_idx, control_idx));
+            used_controls[control_pos] = true;
         }
     }
 
     if matched_pairs.is_empty() {
-        return Err(JsError::new("No matches found"));
+        return Err(MlError::new("No matches found"));
     }
 
     // Compute average treatment effect on matched sample
@@ -175,6 +175,18 @@ pub fn propensity_score_matching(
     let p_value = compute_p_value(ate, &treated_outcomes, &control_outcomes);
 
     Ok(CausalEffect::new(ate, ci_lower, ci_upper, p_value, 0.05).with_sample_sizes(n_treated, n_control))
+}
+
+#[wasm_bindgen]
+pub fn propensity_score_matching(
+    treatment: &[f64],
+    covariates: &[f64],
+    outcome: &[f64],
+    n_samples: usize,
+    n_features: usize,
+) -> Result<CausalEffect, JsError> {
+    propensity_score_matching_impl(treatment, covariates, outcome, n_samples, n_features)
+        .map_err(|e| JsError::new(&e.message))
 }
 
 /// Compute propensity scores using logistic regression
@@ -286,21 +298,14 @@ fn compute_p_value(ate: f64, treated_outcomes: &[f64], control_outcomes: &[f64])
 }
 
 /// Instrumental variables estimation
-///
-/// # Arguments
-/// * `outcome` - Outcome variable
-/// * `treatment` - Treatment variable
-/// * `instrument` - Instrumental variable
-/// * `n_samples` - Number of samples
-#[wasm_bindgen]
-pub fn instrumental_variables(
+pub fn instrumental_variables_impl(
     outcome: &[f64],
     treatment: &[f64],
     instrument: &[f64],
     n_samples: usize,
-) -> Result<CausalEffect, JsError> {
+) -> Result<CausalEffect, MlError> {
     if outcome.len() != n_samples || treatment.len() != n_samples || instrument.len() != n_samples {
-        return Err(JsError::new("All inputs must have same length"));
+        return Err(MlError::new("All inputs must have same length"));
     }
 
     // Two-stage least squares (2SLS)
@@ -313,7 +318,7 @@ pub fn instrumental_variables(
         predicted_treatment.push(beta0_stage1 + beta1_stage1 * instrument[i]);
     }
 
-    let (beta1_stage2, beta0_stage2) = simple_linear_regression(&predicted_treatment, outcome);
+    let (beta1_stage2, _beta0_stage2) = simple_linear_regression(&predicted_treatment, outcome);
 
     // Wald estimator for CI
     let ate = beta1_stage2;
@@ -328,27 +333,31 @@ pub fn instrumental_variables(
     Ok(CausalEffect::new(ate, ci_lower, ci_upper, p_value, 0.05).with_sample_sizes(n_samples, n_samples))
 }
 
-/// Difference-in-differences estimation
-///
-/// # Arguments
-/// * `treated_pre` - Treated group outcomes before treatment
-/// * `treated_post` - Treated group outcomes after treatment
-/// * `control_pre` - Control group outcomes before treatment
-/// * `control_post` - Control group outcomes after treatment
 #[wasm_bindgen]
-pub fn difference_in_differences(
+pub fn instrumental_variables(
+    outcome: &[f64],
+    treatment: &[f64],
+    instrument: &[f64],
+    n_samples: usize,
+) -> Result<CausalEffect, JsError> {
+    instrumental_variables_impl(outcome, treatment, instrument, n_samples)
+        .map_err(|e| JsError::new(&e.message))
+}
+
+/// Difference-in-differences estimation
+pub fn difference_in_differences_impl(
     treated_pre: &[f64],
     treated_post: &[f64],
     control_pre: &[f64],
     control_post: &[f64],
-) -> Result<CausalEffect, JsError> {
+) -> Result<CausalEffect, MlError> {
     let n_treated_pre = treated_pre.len();
     let n_treated_post = treated_post.len();
     let n_control_pre = control_pre.len();
     let n_control_post = control_post.len();
 
     if n_treated_pre != n_treated_post || n_control_pre != n_control_post {
-        return Err(JsError::new("Pre and post groups must have same size"));
+        return Err(MlError::new("Pre and post groups must have same size"));
     }
 
     // Compute means
@@ -376,6 +385,17 @@ pub fn difference_in_differences(
 
     Ok(CausalEffect::new(ate, ci_lower, ci_upper, p_value, 0.05)
         .with_sample_sizes(n_treated_post, n_control_post))
+}
+
+#[wasm_bindgen]
+pub fn difference_in_differences(
+    treated_pre: &[f64],
+    treated_post: &[f64],
+    control_pre: &[f64],
+    control_post: &[f64],
+) -> Result<CausalEffect, JsError> {
+    difference_in_differences_impl(treated_pre, treated_post, control_pre, control_post)
+        .map_err(|e| JsError::new(&e.message))
 }
 
 /// Variance calculation

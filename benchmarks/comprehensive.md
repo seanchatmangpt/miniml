@@ -1,158 +1,161 @@
 # miniml Comprehensive Benchmark Suite
 
-Tests all 30+ algorithms across 10 categories with synthetic datasets.
+110 benchmarks across 26 categories, covering all native-benchmarkable algorithms.
 
 ## Run Instructions
 
+### Native Rust (standalone binary)
 ```bash
-cd /Users/sac/chatmangpt/micro-ml
-pnpm install
-pnpm build
-pnpm bench
+cd crates/miniml-core
+cargo run --bin bench_all --release
 ```
 
-## Benchmark Categories
+### Criterion (statistical benchmarking)
+```bash
+cd crates/miniml-core
+cargo bench
+```
 
-### 1. Classification Algorithms (8 algorithms)
-- K-Nearest Neighbors
-- Decision Tree
-- Random Forest
-- Gradient Boosting
-- AdaBoost
-- Naive Bayes
-- Logistic Regression
-- Perceptron
+### WASM / TypeScript benchmarks
+```bash
+cd /path/to/miniml
+pnpm build
+pnpm test
+```
 
-### 2. Regression Algorithms (6 algorithms)
-- Linear Regression
-- Ridge Regression
-- Polynomial Regression
-- Exponential Regression
-- Logarithmic Regression
-- Power Regression
+## Benchmark Methodology
 
-### 3. Clustering Algorithms (4 algorithms)
-- K-Means
-- K-Means++
-- DBSCAN
-- Hierarchical Clustering
+### Timing Infrastructure
+- **Warmup**: N iterations before timing to stabilize caches and branch prediction
+- **Iterations**: Fast algorithms (O(n) linear) use 100–1000 iterations; expensive ones use 5–10
+- **Precision**: Nanosecond timing via `Instant::elapsed().as_nanos()` — no sub-microsecond truncation
+- **Anti-optimization**: `std::hint::black_box` wraps all results to prevent dead-code elimination
+- **Display**: Tiered formatting (μs/ms/s) with coefficient of variation (CV%)
 
-### 4. Preprocessing (8 methods)
-- Standard Scaler
-- MinMax Scaler
-- Robust Scaler
-- Normalizer
-- Label Encoder
-- One-Hot Encoder
-- Ordinal Encoder
-- Imputer
+### Dataset Scaling
+Datasets are sized to produce measurable, trustworthy results:
+- **Time series**: 100K samples (scaled 200x from original 500 to produce real timing)
+- **Regression**: 10K–100K samples (scaled 20–100x)
+- **Metrics**: 100K samples (scaled 100x)
+- **Preprocessing**: 100K samples (scaled 100x)
+- **Classification**: 2K–10K samples (varies by algorithm complexity)
+- **Clustering**: 1K–5K samples (O(n³) algorithms kept conservative)
+- **Probabilistic**: 1M samples for MC, 100 obs for HMM
+- **Statistical**: 10K samples for t-tests, ANOVA
+- **Kernel**: 500 samples for kernel matrices
+- **Bayesian/GP**: 200-500 samples for MCMC/GP
 
-### 5. Dimensionality Reduction (2 methods)
-- PCA
-- Feature Selection
+### Stability
+Every benchmark reports CV% (coefficient of variation). Target: CV < 10% for reliable measurements. Benchmarks with CV > 10% may need more iterations or larger datasets.
 
-### 6. Metrics & Evaluation (10+ metrics)
-- Confusion Matrix
-- Classification Report
-- Silhouette Score
-- ROC AUC
-- Log Loss
-- Accuracy
-- R²
-- RMSE
-- MAE
-- MSE
+## Architecture: Native vs WASM Benchmarking
 
-### 7. Time Series Analysis (10+ methods)
-- Simple Moving Average (SMA)
-- Exponential Moving Average (EMA)
-- Weighted Moving Average (WMA)
-- Exponential Smoothing
-- Linear Regression Forecasting
-- Polynomial Regression Forecasting
-- Peak Detection
-- Trough Detection
-- Momentum
-- Rate of Change
+Most functions have dual APIs:
+- **`_impl` variants**: Pure Rust, return `Result<T, MlError>`, benchmarkable natively
+- **`#[wasm_bindgen]` wrappers**: Convert errors to `JsError`, benchmarkable in WASM/TS
 
-### 8. Ensemble Methods (3 methods)
-- Random Forest (ensemble)
-- Gradient Boosting (ensemble)
-- AdaBoost (ensemble)
-- Stacked Ensemble
-- Blended Ensemble
-- Voting Ensemble
+Functions that are **WASM-only** (require `JsValue` / `js_sys::Function` / return `js_sys::Array`):
+- LIME explanations, SHAP values
+- Model persistence (save/load JSON)
+- Stacked/Blended/Voting ensembles
+- Decision paths, counterfactuals
+- Fine-tuning, ONNX export/import
+- SMOTE, random oversampling (return `js_sys::Array`)
+- Advanced CV (stratified K-fold, bootstrap, etc. — return `js_sys::Array`)
 
-### 9. Advanced Features (8 modules)
-- **AutoML**: Genetic Algorithm Feature Selection + PSO Hyperparameter Optimization
-- **Model Persistence**: JSON/Binary save/load, base64 encoding
-- **Explainability**: SHAP values, LIME, decision paths, counterfactuals
-- **DataFrame Operations**: select, filter, join, sort, aggregate
-- **Neural Networks**: Dense layers, activations (ReLU, Sigmoid, Tanh, LeakyReLU), optimizers (SGD, Adam, RMSProp)
-- **Causal Inference**: Propensity score matching, instrumental variables, difference-in-differences, uplift modeling
-- **Transfer Learning**: ONNX export/import, fine-tuning, feature extraction
-- **Data Augmentation**: SMOTE, random oversampling, noise injection, mixup, time series augmentation
-- **Advanced Cross-Validation**: Stratified K-fold, group K-fold, time series CV, nested CV, LOOCV, bootstrapping
+These can only be benchmarked via the TypeScript test suite.
 
-### 10. Optimization Suite (7 metaheuristics)
-- Genetic Algorithms (GA)
-- Particle Swarm Optimization (PSO)
-- Simulated Annealing
-- Multi-Armed Bandits (ε-Greedy, UCB, Thompson Sampling)
-- Feature Importance
-- Anomaly Detection
-- Drift Detection
+## Benchmark Categories (110 benchmarks)
 
-## Test Datasets
+### 1. Classification (6)
+KNN, Decision Tree, Naive Bayes, Logistic Regression, Perceptron, Linear SVM
 
-### Classification (1000 samples × 20 features)
-- Binary classification (synthetic, 60/40 split)
-- Multi-class classification (5 classes, balanced)
+### 2. Ensemble Methods (3)
+Random Forest, Gradient Boosting, AdaBoost
 
-### Regression (500 samples × 10 features)
-- Linear relationship with noise
-- Non-linear relationship
+### 3. Regression (10)
+Linear, Ridge, Lasso, Polynomial, Exponential, Logarithmic, Power, Elastic Net, SVR, Quantile Regression
 
-### Clustering (300 samples × 5 features)
-- 3 Gaussian clusters
-- 2 Elongated clusters
+### 4. Clustering (4)
+K-Means, K-Means++, DBSCAN, Hierarchical
 
-### Time Series (100 points)
-- Trend + seasonality
-- Random walk
+### 5. Preprocessing (8)
+Standard Scaler, MinMax Scaler, Robust Scaler, Normalizer, Label Encoder, One-Hot Encoder, Ordinal Encoder, Imputer
 
-## Performance Metrics
+### 6. Dimensionality Reduction (1)
+PCA
 
-- **Accuracy**: Algorithm correctness on test data
-- **Speed**: Execution time (ms)
-- **Memory**: Peak memory usage (MB)
-- **Scalability**: Performance vs dataset size
+### 7. Time Series (12)
+SMA, EMA, WMA, Exponential Smoothing, Moving Average, Trend Forecast, Rate of Change, Momentum, Peak Detection, Trough Detection, Autocorrelation, Seasonal Decompose
 
-## Expected Results
+### 8. Metrics (10)
+Confusion Matrix, Silhouette Score, Davies-Bouldin, Calinski-Harabasz, Matthews Corrcoef, Cohen's Kappa, Balanced Accuracy, MSE, RMSE, MAE
 
-### Fast (<10ms)
-- KNN (small k)
-- Decision Tree
-- Linear/Logistic Regression
-- Preprocessing scalers
-- Metrics computation
+### 9. Neural Networks (2)
+Forward pass, Training
 
-### Medium (10-100ms)
-- Random Forest (100 trees)
-- Gradient Boosting (50 estimators)
-- K-Means clustering
-- AutoML (GA feature selection, small population)
-- Neural Network forward pass
+### 10. AutoML (2)
+AutoFit Classification, AutoFit Regression
 
-### Slow (>100ms)
-- AutoML (GA + PSO, full optimization)
-- DBSCAN (large datasets)
-- Ensemble Stacking (multiple base models)
-- Neural Network training (multiple epochs)
+### 11. Optimization Suite (3)
+Genetic Algorithm, PSO, Simulated Annealing
+
+### 12. Drift Detection (3)
+Jaccard Window, Statistical Drift, Page-Hinkley
+
+### 13. Anomaly Detection (2)
+Statistical Outlier, Isolation Forest
+
+### 14. Causal Inference (3)
+Propensity Score Matching, Instrumental Variables, Difference-in-Differences
+
+### 15. Data Augmentation (1)
+Noise Injection (Gaussian/Uniform)
+
+### 16. Persistence (1)
+Data Hash
+
+### 17. Probabilistic Methods (11)
+MC Integration, MC Multidim Integration, MC Bootstrap, MC Pi Estimation, Markov Steady State, Markov N-Step, Markov Simulation, HMM Forward, HMM Viterbi, HMM Backward, HMM Baum-Welch, Metropolis-Hastings
+
+### 18. Statistical Distributions (7)
+Normal PDF, Normal CDF, Normal PPF, Gamma Function, Binomial CDF, Poisson PMF, Normal Sample
+
+### 19. Statistical Inference (7)
+t-Test One Sample, t-Test Two Sample, Mann-Whitney U, Wilcoxon Signed-Rank, Chi-Square Test, One-Way ANOVA, Descriptive Statistics
+
+### 20. Kernel Methods (3)
+RBF Kernel Matrix, Polynomial Kernel Matrix, Sigmoid Kernel Matrix
+
+### 21. Bayesian Methods (2)
+Bayesian Estimate, Bayesian Linear Regression
+
+### 22. Gaussian Processes (2)
+GP Fit, GP Predict
+
+### 23. Survival Analysis (2)
+Kaplan-Meier, Cox Proportional Hazards
+
+### 24. Association Rules (1)
+Apriori
+
+### 25. Recommendation Systems (2)
+Matrix Factorization, User-User Collaborative
+
+### 26. Graph Algorithms (3)
+PageRank, Shortest Path, Community Detection
+
+## Performance Distribution
+
+| Tier | Time | Count |
+|------|------|-------|
+| Fast (<1ms) | 56 | 51% |
+| Moderate (1–100ms) | 44 | 40% |
+| Slow (>100ms) | 10 | 9% |
 
 ## Implementation Notes
 
-- All benchmarks run in Node.js environment (Vitest)
-- Uses `performance.now()` for timing
-- Memory measured via `process.memoryUsage()`
-- Results exported to JSON for analysis
+- Native benchmarks use `std::time::Instant` with nanosecond precision
+- All data is synthetic (no external dependencies)
+- Results include CV% for stability assessment
+- Full results in `benchmarks/results.md`

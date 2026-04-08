@@ -207,21 +207,20 @@ impl LogarithmicModel {
 }
 
 /// Fit a logarithmic regression model: y = a + b * ln(x)
-#[wasm_bindgen(js_name = "logarithmicRegression")]
-pub fn logarithmic_regression(x: &[f64], y: &[f64]) -> Result<LogarithmicModel, JsError> {
+pub fn logarithmic_regression_impl(x: &[f64], y: &[f64]) -> Result<LogarithmicModel, MlError> {
     if x.len() != y.len() {
-        return Err(JsError::new("x and y arrays must have the same length"));
+        return Err(MlError::new("x and y arrays must have the same length"));
     }
 
     let n = x.len();
     if n < 2 {
-        return Err(JsError::new("Need at least 2 data points for logarithmic regression"));
+        return Err(MlError::new("Need at least 2 data points for logarithmic regression"));
     }
 
     // Check for non-positive x values
     for (i, &xi) in x.iter().enumerate() {
         if xi <= 0.0 {
-            return Err(JsError::new(&format!(
+            return Err(MlError::new(&format!(
                 "All x values must be positive for logarithmic regression (x[{}] = {})",
                 i, xi
             )));
@@ -247,7 +246,7 @@ pub fn logarithmic_regression(x: &[f64], y: &[f64]) -> Result<LogarithmicModel, 
     }
 
     if denominator == 0.0 {
-        return Err(JsError::new("Cannot fit regression: all x values are identical"));
+        return Err(MlError::new("Cannot fit regression: all x values are identical"));
     }
 
     let b = numerator / denominator;
@@ -271,6 +270,11 @@ pub fn logarithmic_regression(x: &[f64], y: &[f64]) -> Result<LogarithmicModel, 
         r_squared,
         n,
     })
+}
+
+#[wasm_bindgen(js_name = "logarithmicRegression")]
+pub fn logarithmic_regression(x: &[f64], y: &[f64]) -> Result<LogarithmicModel, JsError> {
+    logarithmic_regression_impl(x, y).map_err(|e| JsError::new(&e.message))
 }
 
 
@@ -330,27 +334,26 @@ impl PowerModel {
 
 /// Fit a power regression model: y = a * x^b
 /// Uses linearization: ln(y) = ln(a) + b*ln(x)
-#[wasm_bindgen(js_name = "powerRegression")]
-pub fn power_regression(x: &[f64], y: &[f64]) -> Result<PowerModel, JsError> {
+pub fn power_regression_impl(x: &[f64], y: &[f64]) -> Result<PowerModel, MlError> {
     if x.len() != y.len() {
-        return Err(JsError::new("x and y arrays must have the same length"));
+        return Err(MlError::new("x and y arrays must have the same length"));
     }
 
     let n = x.len();
     if n < 2 {
-        return Err(JsError::new("Need at least 2 data points for power regression"));
+        return Err(MlError::new("Need at least 2 data points for power regression"));
     }
 
     // Check for non-positive values
     for (i, (&xi, &yi)) in x.iter().zip(y.iter()).enumerate() {
         if xi <= 0.0 {
-            return Err(JsError::new(&format!(
+            return Err(MlError::new(&format!(
                 "All x values must be positive for power regression (x[{}] = {})",
                 i, xi
             )));
         }
         if yi <= 0.0 {
-            return Err(JsError::new(&format!(
+            return Err(MlError::new(&format!(
                 "All y values must be positive for power regression (y[{}] = {})",
                 i, yi
             )));
@@ -377,7 +380,7 @@ pub fn power_regression(x: &[f64], y: &[f64]) -> Result<PowerModel, JsError> {
     }
 
     if denominator == 0.0 {
-        return Err(JsError::new("Cannot fit regression: all x values are identical"));
+        return Err(MlError::new("Cannot fit regression: all x values are identical"));
     }
 
     let b = numerator / denominator;
@@ -403,6 +406,11 @@ pub fn power_regression(x: &[f64], y: &[f64]) -> Result<PowerModel, JsError> {
         r_squared,
         n,
     })
+}
+
+#[wasm_bindgen(js_name = "powerRegression")]
+pub fn power_regression(x: &[f64], y: &[f64]) -> Result<PowerModel, JsError> {
+    power_regression_impl(x, y).map_err(|e| JsError::new(&e.message))
 }
 
 #[cfg(test)]
